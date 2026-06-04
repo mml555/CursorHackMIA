@@ -1,0 +1,218 @@
+Reciproca — Hackathon MVP Development Plan
+What judges need to see (mapped to your idea)
+Judging lens	MVP must show
+Public URL, no login
+Landing + live demo flow anyone can click through
+Working app
+List offer/need → see AI-suggested matches → “complete” a trade (even simulated)
+Utility
+Solves “I have idle capacity, I need a service” in one vertical
+Creativity + AI
+Matching explained by AI (not just a filter dropdown)
+Beginner story
+One person narrates; simple stack, one happy path
+Bonus
+Deploy by 7:30pm; clean UI (Tailwind + one strong hero)
+Cut for tonight: multi-metro, subscriptions, cash-topup, real vetting ops, tax invoicing, mobile app, graph solver for 4+ party cycles.
+
+Keep for tonight: one metro, one vertical, 2-party + one fake 3-party demo, seeded vendors, AI copy for “why this match,” outcome score UI.
+
+Recommended stack (beginner-friendly, fast deploy)
+Piece	Choice	Why
+Frontend
+Next.js (App Router) + Tailwind
+Vercel deploy in minutes; good UI bonus
+DB
+Supabase (free) or seed JSON in repo
+Supabase if you have 20 min setup; JSON if Wi‑Fi/setup fails
+AI
+OpenAI or Cursor model via one API route
+“Match explanation” + light ranking
+Auth
+None for judges
+Demo mode + optional “admin” route hidden
+Deploy
+Vercel
+Public URL, env vars for API key
+Fallback if anything breaks: static Next.js + data/vendors.json + client-side match scoring (still call it “AI-assisted” if you use an API for the blurb only).
+
+MVP feature spec (single happy path)
+User story (demo script)
+“I’m a yoga studio with empty morning slots. I need bookkeeping. Reciproca finds a vetted bookkeeper who needs wellness marketing — and shows why the trade works.”
+
+Screens (5 max)
+Landing — one-liner, problem, “Try demo” CTA
+Browse network — 8–12 pre-seeded businesses with badges: Verified, Offer, Need, Score 4.8
+List / join — form: business name, offer, need, category (dropdown)
+Matches — after submit, show top 3 cards with match %, AI “why this works,” CTA Propose trade
+Trade complete — confetti or simple success + rate vendor (1–5) → updates score on browse page
+Matching logic (good enough for 4 hours)
+Phase A (ship first): rule score
+
+Same metro (hardcoded: “Austin” or your city)
+Keyword overlap offer ↔ need
+Sort by outcomeScore
+Phase B (if time): one API route
+
+Send user offer/need + top 5 candidates → return ranked IDs + 2-sentence explanation
+Phase C (wow moment): hardcode one 3-party cycle on a “Multi-party match” tab
+
+A → B → C → A with a simple diagram (Mermaid or 3 cards in a triangle)
+Label: “Clears without trade dollars” — ties to your business plan in 10 seconds
+Timeboxed schedule (6:00pm → 9:00pm submit)
+Time	Goal	Owner tip
+6:00–6:20
+Repo, Next.js, Tailwind, deploy Hello World
+Whoever is fastest on laptop
+6:20–6:40
+Seed vendors.json, Browse page
+No backend yet
+6:40–7:10
+List form + Matches page (rule-based)
+Works offline
+7:10–7:30
+PUBLIC URL LIVE + submit URL early
+Tie-breaker points
+7:30–8:10
+AI explanation route + polish UI
+One strong hero, 2 colors max
+8:10–8:40
+3-party demo tab + trade complete + rating
+Pre-rehearse click path
+8:40–9:00
+.cursorrules, README, Submit Project
+Pro drives, beginner writes README
+9:00–10:20
+Demo rehearsal only (90 sec × 3 runs)
+Timer on phone
+Rule: nothing new after 9:00pm except copy and demo practice.
+
+Team roles (2–3 people)
+Role	Tasks
+Beginner (pitch)
+README, demo script, test as “judge,” narrate 90 sec
+Builder
+Next.js pages, match logic, deploy
+AI / polish
+API route, prompts, Tailwind, seed data story
+Data model (minimal)
+// types.ts
+type Business = {
+  id: string;
+  name: string;
+  vertical: string;      // e.g. "wellness"
+  metro: string;         // e.g. "Austin"
+  offer: string;
+  need: string;
+  verified: boolean;
+  outcomeScore: number;  // 0-5
+};
+type Trade = {
+  id: string;
+  fromId: string;
+  toId: string;
+  status: "proposed" | "completed";
+  rating?: number;
+};
+Seed 10 businesses so matches always exist (include 2 obvious pairs + 1 triangle).
+
+AI prompt (single route /api/match)
+You are Reciproca, a B2B trade matcher. Given:
+OFFER: {offer}
+NEED: {need}
+CANDIDATES: {json list of 3 businesses}
+Return JSON: { "matches": [{ "id", "score", "reason" }] }
+Reason must be one sentence, plain English, no jargon.
+If API fails → show rule-based matches + static reason strings (still demoable).
+
+.cursorrules (hackathon deliverable)
+Keep it short; judges want to see how you used Cursor:
+
+# Reciproca hackathon
+- Stack: Next.js 14, Tailwind, Vercel
+- Prefer small components in /components
+- Use seed data in /data/vendors.json until Supabase works
+- Do not add auth for public demo
+- Matching: rule-based first, then /api/match for explanations
+- UI: mobile-friendly, large tap targets for expo demos
+README template (short writeup)
+# Reciproca (hackathon MVP)
+Trust + AI matching for B2B service trade — no trade dollars.
+## What we built
+- Vetted business directory (seeded demo network)
+- Offer/need listing and AI-ranked matches
+- Multi-party trade demo (A→B→C→A)
+- Post-trade vendor scoring
+## How we built it
+Next.js + Tailwind + Vercel + [Supabase|JSON] + OpenAI for match explanations.
+Built with Cursor in ~4 hours.
+## Demo
+https://your-app.vercel.app — click "Try demo", pick Yoga Studio, view matches.
+## Next (post-hackathon)
+Real vetting, subscriptions, tax invoices, second metro.
+90-second demo script (beginner talks)
+Sec	Say	Show
+0–15
+“Businesses have idle capacity but barter fails: no trust, no matching.”
+Landing
+15–30
+“Reciproca is a vetted network plus AI matching — no fake currency.”
+Browse + Verified badges
+30–50
+“I’m a studio offering morning slots; I need bookkeeping.”
+Fill form → Matches
+50–70
+“AI explains why this bookkeeper is a fit; scores come from real outcomes.”
+Match card + reason
+70–85
+“When no pair works, we clear multi-party trades.”
+3-party tab
+85–90
+“Live at [URL]. Next: one metro, one vertical, real liquidity test.”
+URL on slide/phone
+Judging tactics (Beginner track)
+Deploy by 7:30pm — working URL > feature count.
+Pre-seed data — judges won’t type perfect offers.
+“Try demo” button — one click loads a pre-filled studio scenario.
+Visible AI — show the generated “why this match” line (highlight it).
+Trust visible — Verified badge + star score on every card.
+Submit early — then only fix typos.
+Expo mode — phone in hand; pages load in <2s; no login wall.
+Risk cuts (if behind at 7:30pm)
+Drop	Keep
+Supabase
+vendors.json
+Real form persistence
+localStorage or demo-only preset
+OpenAI
+Static reason strings in JSON
+3-party tab
+Mention in pitch only
+Rating persistence
+Toast “Thanks — score updated” (update in-memory)
+Deliverables checklist (before 9:00pm)
+
+ Public URL opens without login
+
+ Happy path works 3× in a row on phone
+
+ .cursorrules in repo root
+
+ README with what / how / next
+
+ Submit Project in event app
+
+ Repo link optional but good for mentors
+Optional +2 UI (roving judges)
+Dark hero + one accent color (e.g. teal)
+Match cards with % ring or progress bar
+Simple logo wordmark “Reciproca”
+Micro-animation on “Trade complete” (CSS only)
+One-sentence scope guard
+Tonight you are not building barter infrastructure — you are building a believable 5-minute story: vetted businesses, AI matching, one trade, public URL.
+
+If you want this saved as hackathon-mvp-plan.md next to your business plan in /Users/yosefzonana/Cursor/, say the word and I’ll add the file. I can also scaffold the Next.js repo structure and seed vendors.json when you’re ready to build.
+
+
+
+Composer 2.5 Fast
