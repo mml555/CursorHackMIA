@@ -1,0 +1,271 @@
+# --- Secrets and environment (never commit) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.key
+*.pfx
+secrets/
+.secrets/
+
+# Stripe / payment keys (accidental commit prevention)
+*sk_live*
+*sk_test*
+*rk_live*
+*rk_test*
+*whsec_*
+
+# --- OS ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --- Editors / IDE ---
+.idea/
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json.example
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# --- Logs and temp ---
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.tmp/
+tmp/
+temp/
+*.tmp
+*.temp
+.cache/
+
+# --- Node / JavaScript / TypeScript ---
+node_modules/
+jspm_packages/
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+.vercel/
+.turbo/
+*.tsbuildinfo
+.eslintcache
+.stylelintcache
+coverage/
+.nyc_output/
+*.lcov
+.parcel-cache/
+.vite/
+storybook-static/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+.envrc
+*.egg
+*.egg-info/
+.eggs/
+dist/
+build/
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+.python-version
+uv.lock.bak
+
+# --- Ruby (if used) ---
+.bundle/
+vendor/bundle/
+
+# --- Go ---
+bin/
+vendor/
+
+# --- Rust ---
+target/
+
+# --- Java / Kotlin / Android ---
+*.class
+*.jar
+*.war
+.gradle/
+build/
+local.properties
+*.iml
+.cxx/
+.externalNativeBuild/
+
+# --- Flutter / Dart ---
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+**/build/
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# --- iOS / Xcode ---
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+**/DerivedData/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# --- Android ---
+android/.gradle/
+android/app/debug/
+android/app/profile/
+android/app/release/
+*.apk
+*.aab
+*.keystore
+!debug.keystore
+google-services.json.bak
+
+# --- React Native / Expo ---
+.expo/
+.expo-shared/
+dist/
+web-build/
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+*.orig.*
+
+# --- Firebase / Amplify generated (policy: commit only if team standard) ---
+# Uncomment if your team does NOT commit these:
+# google-services.json
+# GoogleService-Info.plist
+# amplify_outputs.json
+# aws-exports.js
+
+# --- Supabase ---
+.branches/
+.supabase/
+
+# --- Convex ---
+.convex/
+
+# --- Docker ---
+.docker/
+
+# --- Terraform / IaC ---
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# --- Databases / local data ---
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+pgdata/
+postgres-data/
+redis-data/
+dump.rdb
+*.sql.gz
+data/raw/
+data/processed/
+!data/.gitkeep
+
+# --- ML / notebooks / artifacts ---
+models/
+checkpoints/
+*.pt
+*.pth
+*.onnx
+*.h5
+*.pkl
+*.joblib
+wandb/
+mlruns/
+.neptune/
+.dvc/tmp/
+.dvc/cache/
+artifacts/
+outputs/
+runs/
+datasets/
+!datasets/.gitkeep
+
+# --- Stripe CLI ---
+.stripe/
+
+# --- Testing / Playwright / Cypress ---
+playwright-report/
+test-results/
+blob-report/
+cypress/videos/
+cypress/screenshots/
+
+# --- Misc build and package managers ---
+*.tgz
+*.tar.gz
+vendor/
+composer.lock.bak
+package-lock.json.bak
+
+# --- Cursor (local only — do not push to GitHub) ---
+# NOTE: Ignoring .cursor/ affects GIT only. Cursor still loads rules from
+# .cursor/rules/*.mdc on disk in this workspace. Do not add .cursor/rules to
+# .cursor/gitignore (that would affect indexing, not rule application).
+.cursor/
