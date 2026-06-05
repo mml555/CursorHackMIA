@@ -12,6 +12,7 @@ import type { Member, Navigate, Screen } from "../types";
 import {
   Button,
   Chip,
+  EmptyState,
   ErrorState,
   IconArrow,
   SkeletonCard,
@@ -113,8 +114,13 @@ export function BusinessProfileScreen({
       try {
         const data = await fetchBusinessProfile(businessId);
         if (!cancelled) {
-          setProfile(data);
-          setError(null);
+          if (!data?.id) {
+            setProfile(null);
+            setError("Business not found");
+          } else {
+            setProfile(data);
+            setError(null);
+          }
         }
       } catch (err) {
         if (!cancelled) {
@@ -159,6 +165,15 @@ export function BusinessProfileScreen({
         )}
 
         {error && <ErrorState message={error} onRetry={retry} />}
+
+        {!loading && !error && !profile && (
+          <EmptyState
+            title="Business not found"
+            message="This profile may have been removed or is no longer available in the network."
+            actionLabel={RETURN_LABELS[returnTo] ?? "Go back"}
+            onAction={() => go(returnTo)}
+          />
+        )}
 
         {!loading && !error && profile && (
           <div className="profile-layout">

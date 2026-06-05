@@ -12,6 +12,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/discovery/stats",
   "/api/discovery/recommendations",
   "/api/discovery/demo-interest",
+  "/api/discovery/businesses/(.*)",
 ]);
 
 function isOnboardingWelcome(req: Request) {

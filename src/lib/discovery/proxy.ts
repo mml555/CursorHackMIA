@@ -20,9 +20,9 @@ type DiscoverySwipeResponse = {
 };
 
 export function fetchDiscoveryBusinessProfile(businessId: string) {
-  return backendRequestPublic<{ profile: BusinessProfile }>(
+  return backendRequestPublic<BusinessProfile>(
     `/discovery/businesses/${encodeURIComponent(businessId)}`,
-  ).then((payload) => payload.profile);
+  );
 }
 
 export function fetchDiscoveryNetwork(searchParams: URLSearchParams) {

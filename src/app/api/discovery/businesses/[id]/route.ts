@@ -1,5 +1,5 @@
 import { apiError, apiSuccess, handleRouteError } from "@/lib/api/errors";
-import { fetchDiscoveryBusinessProfile } from "@/lib/discovery/proxy";
+import { getBusinessProfile } from "@/lib/discovery/service";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +14,11 @@ export async function GET(_req: Request, context: RouteContext) {
       return apiError("VALIDATION_ERROR", "Business id is required", 400);
     }
 
-    const profile = await fetchDiscoveryBusinessProfile(id);
+    const profile = await getBusinessProfile(id);
+    if (!profile) {
+      return apiError("NOT_FOUND", "Business not found", 404);
+    }
+
     return apiSuccess({ profile });
   } catch (error) {
     return handleRouteError(error);
