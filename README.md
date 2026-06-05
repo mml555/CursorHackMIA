@@ -2,6 +2,10 @@
 ### The trust-and-matching network for business-to-business service trade
 *Working name. Standalone company. v1.0*
 
+**Product spec (MVP):** [docs/PRD.md](docs/PRD.md) — user flows, features, Clerk + Supabase + Vercel stack.
+
+**Web app (Clerk auth):** [my-clerk-next-app/](my-clerk-next-app/) — Next.js 16 + Clerk (`app_3Eh29Yn9v2NqcMHuCpQIOZ85uS4`). From that folder: `npm run dev` → http://localhost:3000 (or next free port). Sign up via **Sign up** in the header.
+
 > **Reading note:** Every financial figure is an **illustrative model with stated assumptions**, flagged `[MODEL]` — not a claim of fact. Market sizes are `[VERIFIED]` from cited sources (see end).
 
 ---
