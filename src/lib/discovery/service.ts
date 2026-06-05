@@ -9,6 +9,7 @@ import {
   cardsToMembers,
   parsePhotos,
 } from "@/lib/discovery/mappers";
+import { buildSimpleRecommendations } from "@/lib/discovery/simple-recommendations";
 import { DEMO_FOCAL_BUSINESS_SLUG } from "@/lib/discovery/constants";
 import type {
   DiscoveryCard,
@@ -136,15 +137,48 @@ export async function getBusinessIdBySlug(slug: string): Promise<string | null> 
 
 async function getDiscoverySwipeExcludedBusinessIds(
   businessId: string,
+  options?: { passesOnly?: boolean },
 ): Promise<string[]> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("business_discovery_swipes")
     .select("target_business_id")
     .eq("swiper_business_id", businessId);
 
+  if (options?.passesOnly) {
+    query = query.eq("action", "pass");
+  }
+
+  const { data, error } = await query;
+
   if (error) throw error;
   return (data ?? []).map((row) => row.target_business_id);
+}
+
+async function getSimpleRecommendationsForBusiness(
+  focalBusinessId: string,
+  options?: { passesOnlySwipes?: boolean },
+) {
+  const cards = await listDiscoveryCards();
+  const focalCard =
+    cards.find((card) => card.business_id === focalBusinessId) ?? null;
+  const swipeExcluded = await getDiscoverySwipeExcludedBusinessIds(
+    focalBusinessId,
+    { passesOnly: options?.passesOnlySwipes },
+  );
+
+  const candidates = cards
+    .filter((card) => card.business_id !== focalBusinessId)
+    .filter((card) => !swipeExcluded.includes(card.business_id))
+    .filter(
+      (card) =>
+        !focalCard?.metro ||
+        card.metro?.toLowerCase() === focalCard.metro?.toLowerCase(),
+    )
+    .sort((a, b) => (b.reputation_score ?? 0) - (a.reputation_score ?? 0))
+    .slice(0, 8);
+
+  return buildSimpleRecommendations(focalCard, candidates);
 }
 
 export async function getDiscoveryRecommendations(focalBusinessId: string) {
@@ -200,7 +234,19 @@ export async function getDemoRecommendations() {
     };
   }
 
-  return getDiscoveryRecommendations(focalBusinessId);
+  const simple = await getSimpleRecommendationsForBusiness(focalBusinessId, {
+    passesOnlySwipes: true,
+  });
+  if (simple.matches.length > 0) {
+    return simple;
+  }
+
+  const ai = await getDiscoveryRecommendations(focalBusinessId);
+  if (ai.matches.length > 0) {
+    return ai;
+  }
+
+  return simple;
 }
 
 export async function listMutualMatches(
