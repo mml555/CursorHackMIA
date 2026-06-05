@@ -57,11 +57,11 @@ export function TopNav({
           <span className="nav-status-dot" />
           {summary.total} vetted
         </span>
-        <Button variant="ghost" size="sm" onClick={() => go("matches")}>
-          Try demo
+        <Button variant="ghost" size="sm" onClick={() => go("join")}>
+          Apply
         </Button>
         <Button variant="primary" size="sm" onClick={() => go("matches")}>
-          <IconArrow size={14} stroke="#0E0F11" /> Propose
+          <IconArrow size={14} stroke="#0E0F11" /> Matches
         </Button>
         <span className="avatar" title={metroLabel}>
           {metroLabel.slice(0, 1).toUpperCase()}

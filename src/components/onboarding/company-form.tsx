@@ -69,7 +69,7 @@ export function CompanyForm({
     <OnboardingShell
       step="company"
       title="Company profile"
-      description="This goes through our API middleware to your backend service."
+      description="Tell us about your business. This information is reviewed before you can trade on the network."
     >
       <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
         <Field label="Company name" htmlFor="legalName">

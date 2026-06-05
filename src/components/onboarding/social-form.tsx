@@ -40,7 +40,7 @@ export function SocialForm({
   }
 
   return (
-    <OnboardingShell step="social" title="Social profiles" description="Optional URLs forwarded to your backend for enrichment.">
+    <OnboardingShell step="social" title="Social profiles" description="Optional links that help us verify your business during vetting.">
       <form onSubmit={(e) => { e.preventDefault(); submit(values); }} className="space-y-4">
         <Field label="Facebook" htmlFor="facebook"><TextInput id="facebook" type="url" value={values.facebook} onChange={(e) => setValues({ ...values, facebook: e.target.value })} /></Field>
         <Field label="Instagram" htmlFor="instagram"><TextInput id="instagram" type="url" value={values.instagram} onChange={(e) => setValues({ ...values, instagram: e.target.value })} /></Field>

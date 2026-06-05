@@ -1,139 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 import type { Navigate } from "../types";
-import { Button, IconClose } from "../primitives";
+import { Button } from "../primitives";
 
 export function Join({ go }: { go: Navigate }) {
-  const [step, setStep] = useState(1);
-  const [services, setServices] = useState("");
-  const [showErr, setShowErr] = useState(true);
-  const sections = ["Company", "Your contact information", "What you trade"];
-
   return (
     <div className="screen">
       <div className="container-narrow" style={{ paddingTop: 40, paddingBottom: 64 }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 8,
-          }}
-        >
-          <h1 style={{ fontSize: 36, margin: 0 }}>Apply to join</h1>
-          <span className="progress-pill">
-            <span className="progress-dots">
-              {[1, 2, 3].map((i) => (
-                <span key={i} className={"pdot" + (i <= step ? " on" : "")} />
-              ))}
-            </span>
-            {step} of 3 · {sections[step - 1]}
-          </span>
+        <div className="section-head" style={{ marginBottom: 28 }}>
+          <div>
+            <h1 style={{ fontSize: 40, margin: 0 }}>Join Reciproca</h1>
+            <p className="muted" style={{ marginTop: 10, maxWidth: 520 }}>
+              You can explore the network first or start your vetting
+              application when you&apos;re ready to trade as your company.
+            </p>
+          </div>
         </div>
-        <p className="muted" style={{ marginBottom: 28 }}>
-          We review your profile within 48 hours. Vetting includes a license
-          check, a trade reference, and an onboarding review.
-        </p>
 
-        <div className="card" style={{ padding: 28 }}>
-          <div className="form-section" onFocus={() => setStep(1)}>
-            <h3 style={{ margin: "0 0 18px" }}>Company</h3>
-            <div className="field-grid">
-              <div>
-                <label className="label">Legal business name</label>
-                <input
-                  className="input"
-                  placeholder="Sunrise Yoga Studio LLC"
-                  defaultValue="Sunrise Yoga Studio LLC"
-                />
-              </div>
-              <div>
-                <label className="label">Industry</label>
-                <input className="input" placeholder="Wellness" defaultValue="Wellness" />
-              </div>
-            </div>
-            <div style={{ marginTop: 18 }}>
-              <label className="label">Website</label>
-              <input className="input" placeholder="sunriseyoga.co" />
-            </div>
-          </div>
-
-          <div className="form-section" onFocus={() => setStep(2)}>
-            <h3 style={{ margin: "0 0 18px" }}>Your contact information</h3>
-            <div className="field-grid">
-              <div>
-                <label className="label">Full name</label>
-                <input className="input" placeholder="Maya Ellis" />
-              </div>
-              <div>
-                <label className="label">Business email</label>
-                <input className="input" placeholder="maya@sunriseyoga.co" />
-                <div className="helper">
-                  We need a valid business email. Personal addresses like Gmail are
-                  not accepted for vetting.
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="form-section" onFocus={() => setStep(3)}>
-            <h3 style={{ margin: "0 0 18px" }}>What you trade</h3>
-            <div>
-              <label className="label">Services you will trade</label>
-              <input
-                className={"input" + (showErr && !services ? " error" : "")}
-                placeholder="60-minute yoga classes"
-                value={services}
-                onChange={(e) => setServices(e.target.value)}
-                onFocus={() => setStep(3)}
-              />
-              {showErr && !services ? (
-                <div className="error-msg">
-                  <IconClose size={13} stroke="var(--destructive)" />
-                  Services you will trade is required.
-                </div>
-              ) : (
-                <div className="helper">
-                  Be specific. &quot;60-minute yoga classes&quot; beats
-                  &quot;wellness.&quot;
-                </div>
-              )}
-            </div>
-            <div style={{ marginTop: 18 }}>
-              <label className="label">What you are looking for</label>
-              <input className="input" placeholder="Brand photography" />
-              <div className="helper">
-                What would you normally pay a vendor for?
-              </div>
-            </div>
-            <div style={{ marginTop: 18 }}>
-              <label className="label">Approximate annual revenue (optional)</label>
-              <select className="select" defaultValue="">
-                <option value="" disabled>
-                  Select a range
-                </option>
-                <option>Under $250K</option>
-                <option>$250K – $1M</option>
-                <option>$1M – $5M</option>
-                <option>Over $5M</option>
-              </select>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", gap: 12, marginTop: 28 }}>
-            <Button
-              variant="primary"
-              onClick={() => {
-                if (!services) setShowErr(true);
-                else window.location.assign("/onboarding");
-              }}
-            >
-              Submit application
+        <div className="grid" style={{ gap: 16 }}>
+          <div
+            className="card"
+            style={{
+              padding: 28,
+              border: "1px solid var(--amber)",
+              boxShadow: "0 0 0 1px rgba(240,165,0,0.15)",
+            }}
+          >
+            <span className="top-pill" style={{ marginBottom: 14 }}>
+              Recommended first
+            </span>
+            <h2 style={{ fontSize: 24, margin: "0 0 10px" }}>Explore the live demo</h2>
+            <p className="muted" style={{ marginBottom: 20, lineHeight: 1.6 }}>
+              Browse real Austin businesses, see AI-ranked matches, and propose a
+              trade as our demo studio. No sign-up or onboarding required.
+            </p>
+            <Button variant="primary" onClick={() => go("matches")}>
+              Try the demo
             </Button>
-            <Button variant="secondary" onClick={() => go("matches")}>
-              Explore the demo
-            </Button>
+          </div>
+
+          <div className="card" style={{ padding: 28 }}>
+            <span className="tag" style={{ marginBottom: 14, display: "inline-block" }}>
+              Vetted members
+            </span>
+            <h2 style={{ fontSize: 24, margin: "0 0 10px" }}>Apply to join the network</h2>
+            <p className="muted" style={{ marginBottom: 20, lineHeight: 1.6 }}>
+              Create an account and tell us about your company, offers, and needs.
+              We review every business within 48 hours before granting trade access.
+            </p>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <Link href="/sign-up">
+                <Button variant="secondary">Create account</Button>
+              </Link>
+              <Link href="/onboarding">
+                <Button variant="ghost">I already have an account</Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

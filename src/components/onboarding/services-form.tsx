@@ -94,7 +94,7 @@ export function ServicesForm({
   }
 
   return (
-    <OnboardingShell step="services" title="Services" description="Offers and needs are sent to your backend through the middleware layer.">
+    <OnboardingShell step="services" title="What you trade" description="List what your business can offer other members and what you need in return. Specific services match better.">
       <form onSubmit={onSubmit} className="space-y-4">
         <LineEditor title="Services offered" lines={offers} onChange={setOffers} />
         <LineEditor title="Services looking for" lines={needs} onChange={setNeeds} />

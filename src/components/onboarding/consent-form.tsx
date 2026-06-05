@@ -39,7 +39,7 @@ export function ConsentForm() {
   }
 
   return (
-    <OnboardingShell step="consent" title="Scraping consent" description="Consent is recorded by your backend via the middleware API.">
+    <OnboardingShell step="consent" title="Data consent" description="We may reference public business information to speed up vetting. You can withdraw consent later.">
       <form onSubmit={onSubmit} className="space-y-4">
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
           I consent to Reciproca using publicly available information from the URLs I

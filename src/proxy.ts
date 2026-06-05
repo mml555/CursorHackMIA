@@ -14,8 +14,12 @@ const isPublicRoute = createRouteMatcher([
   "/api/discovery/demo-interest",
 ]);
 
+function isOnboardingWelcome(req: Request) {
+  return new URL(req.url).pathname === "/onboarding";
+}
+
 export default clerkMiddleware(async (auth, req) => {
-  if (!isPublicRoute(req)) {
+  if (!isPublicRoute(req) && !isOnboardingWelcome(req)) {
     await auth.protect();
   }
 });

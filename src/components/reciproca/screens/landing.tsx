@@ -83,16 +83,16 @@ export function Landing({
             platform currency, no bank.
           </p>
           <div className="hero-cta">
-            <Button variant="primary" onClick={() => go("join")}>
-              Apply to join
+            <Button variant="primary" onClick={() => go("matches")}>
+              Explore live demo
             </Button>
-            <Button variant="secondary" onClick={() => go("matches")}>
-              See how it works
+            <Button variant="secondary" onClick={() => go("join")}>
+              Apply to join
             </Button>
           </div>
           <p className="muted" style={{ marginTop: 22, fontSize: 14 }}>
-            Most service businesses have skills to spare and budgets they would
-            rather protect.
+            No account needed to browse matches and the member network. Apply
+            when you want to trade as your business.
           </p>
         </div>
 

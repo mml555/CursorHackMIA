@@ -13,11 +13,11 @@ export function LandingNav({ go }: { go: Navigate }) {
         <Mark size={24} /> Reciproca
       </button>
       <div className="nav-right">
-        <Button variant="ghost" size="sm" onClick={() => go("matches")}>
-          Try demo
+        <Button variant="primary" size="sm" onClick={() => go("matches")}>
+          Live demo
         </Button>
-        <Button variant="primary" size="sm" onClick={() => go("join")}>
-          Apply to join
+        <Button variant="ghost" size="sm" onClick={() => go("join")}>
+          Apply
         </Button>
       </div>
     </nav>

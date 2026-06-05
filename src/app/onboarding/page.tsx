@@ -1,12 +1,22 @@
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { OnboardingWelcome } from "@/components/onboarding/welcome";
 import { fetchOnboardingStatus } from "@/lib/onboarding/proxy";
-import { stepHref } from "@/lib/onboarding/schemas";
 
 export default async function OnboardingIndexPage() {
-  try {
-    const status = await fetchOnboardingStatus();
-    redirect(stepHref(status.isComplete ? "complete" : status.step));
-  } catch {
-    redirect("/onboarding/company");
+  const { userId } = await auth();
+  let status = null;
+
+  if (userId) {
+    try {
+      status = await fetchOnboardingStatus();
+      if (status.isComplete) {
+        redirect("/onboarding/complete");
+      }
+    } catch {
+      status = null;
+    }
   }
+
+  return <OnboardingWelcome status={status} isSignedIn={Boolean(userId)} />;
 }

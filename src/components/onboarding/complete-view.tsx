@@ -30,14 +30,29 @@ export function CompleteView({ status }: { status: OnboardingStatus }) {
 
   if (status.isComplete) {
     return (
-      <OnboardingShell step="complete" title="Submitted" description="Your backend has marked onboarding as complete.">
-        <p className="text-sm">Profile for <strong>{profile?.legalName ?? "your company"}</strong> is ready for review.</p>
+      <OnboardingShell step="complete" title="Application submitted" description="Our team is reviewing your business. You will get deck access after approval.">
+        <div className="space-y-4 text-sm">
+          <p>
+            Profile for <strong>{profile?.legalName ?? "your company"}</strong>{" "}
+            is in the vetting queue.
+          </p>
+          <p className="text-zinc-600 dark:text-zinc-400">
+            While you wait, you can still explore how matching works in the live
+            demo.
+          </p>
+          <a
+            href="/demo"
+            className="inline-flex rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-900"
+          >
+            Open live demo
+          </a>
+        </div>
       </OnboardingShell>
     );
   }
 
   return (
-    <OnboardingShell step="complete" title="Review" description="Confirm and submit to your backend through the middleware API.">
+    <OnboardingShell step="complete" title="Review and submit" description="Check your details, then submit for vetting. Approved businesses get access to the trade network.">
       <div className="space-y-4 text-sm">
         <div><strong>Company:</strong> {profile?.legalName ?? "—"}</div>
         <div><strong>Industry:</strong> {profile?.industry ?? "—"}</div>
