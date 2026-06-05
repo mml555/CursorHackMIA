@@ -7,13 +7,23 @@ export const tradeLineItemSchema = z.object({
   fmv: z.number().nonnegative().optional(),
 });
 
+export const businessPhotoInputSchema = z.object({
+  storagePath: z.string().min(1).max(500),
+  fileName: z.string().min(1).max(255),
+  mimeType: z.string().max(100).optional(),
+  caption: z.string().max(500).optional(),
+  sortOrder: z.number().int().min(0).max(20).optional(),
+});
+
 export const createBusinessSchema = z.object({
   legalName: z.string().min(1).max(200),
   dba: z.string().max(200).optional(),
   metro: z.string().min(1).max(100),
   vertical: z.string().min(1).max(100),
   website: z.string().url().optional().or(z.literal("")),
-  description: z.string().max(2000).optional(),
+  description: z.string().min(10).max(2000),
+  logoStoragePath: z.string().min(1).max(500),
+  photos: z.array(businessPhotoInputSchema).min(1).max(12),
 });
 
 export const createListingSchema = z.object({
@@ -63,6 +73,7 @@ export const vendorRatingSchema = z.object({
   comment: z.string().max(1000).optional(),
 });
 
+export type BusinessPhotoInput = z.infer<typeof businessPhotoInputSchema>;
 export type CreateBusinessInput = z.infer<typeof createBusinessSchema>;
 export type CreateListingInput = z.infer<typeof createListingSchema>;
 export type SwipeProposalInput = z.infer<typeof swipeProposalSchema>;

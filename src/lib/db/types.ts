@@ -70,6 +70,7 @@ export type Database = {
           vertical: string | null;
           website: string | null;
           description: string | null;
+          logo_storage_path: string | null;
           status: BusinessStatus;
           reputation_score: number | null;
           ratings_count: number;
@@ -86,6 +87,7 @@ export type Database = {
           vertical?: string | null;
           website?: string | null;
           description?: string | null;
+          logo_storage_path?: string | null;
           status?: BusinessStatus;
           reputation_score?: number | null;
           ratings_count?: number;
@@ -102,6 +104,7 @@ export type Database = {
           vertical?: string | null;
           website?: string | null;
           description?: string | null;
+          logo_storage_path?: string | null;
           status?: BusinessStatus;
           reputation_score?: number | null;
           ratings_count?: number;
@@ -441,6 +444,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      business_photos: {
+        Row: {
+          id: string;
+          business_id: string;
+          storage_path: string;
+          file_name: string;
+          mime_type: string | null;
+          caption: string | null;
+          sort_order: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          business_id: string;
+          storage_path: string;
+          file_name: string;
+          mime_type?: string | null;
+          caption?: string | null;
+          sort_order?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          business_id?: string;
+          storage_path?: string;
+          file_name?: string;
+          mime_type?: string | null;
+          caption?: string | null;
+          sort_order?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -458,6 +494,7 @@ export type Database = {
 
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type Business = Database["public"]["Tables"]["businesses"]["Row"];
+export type BusinessPhoto = Database["public"]["Tables"]["business_photos"]["Row"];
 export type BusinessMember =
   Database["public"]["Tables"]["business_members"]["Row"];
 export type Listing = Database["public"]["Tables"]["listings"]["Row"];
