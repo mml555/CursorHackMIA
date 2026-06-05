@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
@@ -5,9 +6,15 @@ export default function Home() {
     <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 py-16 font-sans dark:bg-black">
       <main className="flex w-full max-w-3xl flex-col items-center gap-10 text-center">
         <div>
-          <h1 className="text-4xl font-semibold tracking-tight text-black dark:text-zinc-50">
-            Reciproca
-          </h1>
+          <Image
+            src="/reciproca/reciproca-logo-full.png"
+            alt="Reciproca"
+            width={200}
+            height={48}
+            className="mx-auto h-12 w-auto"
+            priority
+          />
+          <h1 className="sr-only">Reciproca</h1>
           <p className="mx-auto mt-4 max-w-xl text-lg leading-8 text-zinc-600 dark:text-zinc-400">
             The trust-and-matching network for B2B service trade. Browse the
             network first, then apply when you want to trade as your business.
@@ -56,6 +63,13 @@ export default function Home() {
 
         <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
           <Link
+            href="/v/sunrise-yoga-studio"
+            className="font-medium text-zinc-500 underline-offset-4 hover:text-zinc-800 hover:underline dark:hover:text-zinc-300"
+          >
+            Sample vendor
+          </Link>
+          <span className="text-zinc-300 dark:text-zinc-700">·</span>
+          <Link
             href="/design"
             className="font-medium text-zinc-500 underline-offset-4 hover:text-zinc-800 hover:underline dark:hover:text-zinc-300"
           >
@@ -67,6 +81,20 @@ export default function Home() {
             className="font-medium text-zinc-500 underline-offset-4 hover:text-zinc-800 hover:underline dark:hover:text-zinc-300"
           >
             Sign in
+          </Link>
+          <span className="text-zinc-300 dark:text-zinc-700">·</span>
+          <Link
+            href="/privacy"
+            className="font-medium text-zinc-500 underline-offset-4 hover:text-zinc-800 hover:underline dark:hover:text-zinc-300"
+          >
+            Privacy
+          </Link>
+          <span className="text-zinc-300 dark:text-zinc-700">·</span>
+          <Link
+            href="/terms"
+            className="font-medium text-zinc-500 underline-offset-4 hover:text-zinc-800 hover:underline dark:hover:text-zinc-300"
+          >
+            Terms
           </Link>
         </div>
       </main>

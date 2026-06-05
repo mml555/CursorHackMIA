@@ -24,6 +24,7 @@ export function TopNav({
       label: "Network",
       n: summary.total > 0 ? String(summary.total) : null,
     },
+    { id: "multi-party", label: "3-way", n: null },
     { id: "join", label: "Join", n: null },
   ];
 

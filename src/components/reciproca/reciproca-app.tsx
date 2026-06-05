@@ -8,8 +8,10 @@ import { Landing } from "./screens/landing";
 import { LandingNav } from "./screens/landing-nav";
 import { MatchPointsScreen } from "./screens/match-points";
 import { Matches } from "./screens/matches";
+import { MultiParty } from "./screens/multi-party";
+import { RatingScreen } from "./screens/rating";
 import { TopNav } from "./screens/top-nav";
-import type { Navigate, Screen } from "./types";
+import type { Member, Navigate, Screen } from "./types";
 import { useDiscoveryStats } from "./use-discovery-stats";
 
 export function ReciprocaApp() {
@@ -18,6 +20,8 @@ export function ReciprocaApp() {
     null,
   );
   const [profileReturnTo, setProfileReturnTo] = useState<Screen>("network");
+  const [ratingMember, setRatingMember] = useState<Member | null>(null);
+  const [ratingDemo, setRatingDemo] = useState(true);
   const { summary } = useDiscoveryStats("Austin");
 
   const go: Navigate = (next, options) => {
@@ -27,6 +31,12 @@ export function ReciprocaApp() {
       setProfileReturnTo(options.returnTo ?? screen);
     } else if (next !== "profile") {
       setProfileBusinessId(null);
+    }
+    if (options?.ratingMember) {
+      setRatingMember(options.ratingMember);
+      setRatingDemo(options.ratingDemo ?? true);
+    } else if (next !== "rating") {
+      setRatingMember(null);
     }
     window.scrollTo({ top: 0 });
   };
@@ -52,6 +62,10 @@ export function ReciprocaApp() {
           returnTo={profileReturnTo}
           go={go}
         />
+      )}
+      {screen === "multi-party" && <MultiParty go={go} />}
+      {screen === "rating" && (
+        <RatingScreen member={ratingMember} demo={ratingDemo} go={go} />
       )}
     </div>
   );

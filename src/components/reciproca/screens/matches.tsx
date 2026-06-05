@@ -22,6 +22,7 @@ import {
 
 export function Matches({ go }: { go: Navigate }) {
   const [modal, setModal] = useState<Member | null>(null);
+  const [lastProposed, setLastProposed] = useState<Member | null>(null);
   const [phase, setPhase] = useState<"list" | "success">("list");
   const [toast, setToast] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -69,10 +70,23 @@ export function Matches({ go }: { go: Navigate }) {
         <div className="container">
           <SuccessView
             demo={interestMode === "demo"}
+            onRate={() => {
+              if (lastProposed) {
+                go("rating", {
+                  ratingMember: lastProposed,
+                  ratingDemo: interestMode === "demo",
+                });
+                setPhase("list");
+              }
+            }}
             onTrades={() => {
-              setToast(true);
-              setTimeout(() => setToast(false), 2600);
-              setPhase("list");
+              if (interestMode === "demo") {
+                setToast(true);
+                setTimeout(() => setToast(false), 2600);
+                setPhase("list");
+              } else {
+                window.location.href = "/trades";
+              }
             }}
             onBrowse={() => {
               setPhase("list");
@@ -181,6 +195,7 @@ export function Matches({ go }: { go: Navigate }) {
           onSend={async () => {
             if (!modal) return;
             const mode = await expressDiscoveryInterest(modal.id);
+            setLastProposed(modal);
             setInterestMode(mode);
             setModal(null);
             setPhase("success");

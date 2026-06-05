@@ -176,6 +176,35 @@ export async function getBusinessPhotos(businessId: string) {
   return data ?? [];
 }
 
+export async function getApprovedBusinessBySlug(slug: string) {
+  const supabase = createAdminClient();
+
+  const { data: business, error } = await supabase
+    .from("businesses")
+    .select("*")
+    .eq("slug", slug)
+    .eq("status", "approved")
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!business) return null;
+
+  const photos = await getBusinessPhotos(business.id);
+
+  const { data: listings } = await supabase
+    .from("listings")
+    .select("*")
+    .eq("business_id", business.id)
+    .eq("is_active", true)
+    .order("listing_type", { ascending: true });
+
+  return {
+    business,
+    photos,
+    listings: listings ?? [],
+  };
+}
+
 export async function getBusinessWithMembership(clerkUserId: string) {
   const supabase = createAdminClient();
 

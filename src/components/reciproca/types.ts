@@ -9,14 +9,21 @@ export type Screen =
   | "network"
   | "join"
   | "profile"
-  | "match-points";
+  | "match-points"
+  | "multi-party"
+  | "rating";
 
 export type Member = DiscoveryMember;
 export type Match = DiscoveryMatch;
 
 export type Navigate = (
   screen: Screen,
-  options?: { businessId?: string; returnTo?: Screen },
+  options?: {
+    businessId?: string;
+    returnTo?: Screen;
+    ratingMember?: Member;
+    ratingDemo?: boolean;
+  },
 ) => void;
 
 export type DiscoverySummary = {

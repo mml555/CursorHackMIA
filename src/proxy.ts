@@ -6,6 +6,9 @@ const isPublicRoute = createRouteMatcher([
   "/design(.*)",
   "/sign-in(.*)",
   "/sign-up(.*)",
+  "/privacy",
+  "/terms",
+  "/v/(.*)",
   "/api/health",
   "/api/webhooks/(.*)",
   "/api/discovery/network",
@@ -13,6 +16,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/discovery/recommendations",
   "/api/discovery/demo-interest",
   "/api/discovery/businesses/(.*)",
+  "/api/vendors/(.*)",
 ]);
 
 function isOnboardingWelcome(req: Request) {

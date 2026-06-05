@@ -9,7 +9,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const HIDDEN_PREFIXES = ["/demo", "/design"];
+const HIDDEN_PREFIXES = ["/demo", "/design", "/deck", "/trades", "/profile", "/admin", "/v/"];
 
 export function AppHeader() {
   const pathname = usePathname();
