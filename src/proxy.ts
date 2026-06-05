@@ -11,6 +11,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/discovery/network",
   "/api/discovery/stats",
   "/api/discovery/recommendations",
+  "/api/discovery/demo-interest",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

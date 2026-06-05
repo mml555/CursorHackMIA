@@ -77,3 +77,41 @@ export async function swipeDiscoveryBusiness(input: {
     );
   }
 }
+
+/** Persist demo interest when viewer is not signed in (uses seeded focal business). */
+export async function recordDemoInterest(targetBusinessId: string): Promise<void> {
+  const res = await fetch("/api/discovery/demo-interest", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ targetBusinessId }),
+  });
+
+  if (!res.ok) {
+    const body = (await res.json()) as { error?: { message?: string } };
+    throw new DiscoveryClientError(
+      body.error?.message ?? "Could not record interest",
+      res.status,
+    );
+  }
+}
+
+export async function expressDiscoveryInterest(
+  targetBusinessId: string,
+): Promise<"member" | "demo"> {
+  try {
+    await swipeDiscoveryBusiness({
+      targetBusinessId,
+      action: "interested",
+    });
+    return "member";
+  } catch (error) {
+    if (
+      error instanceof DiscoveryClientError &&
+      (error.status === 401 || error.status === 403)
+    ) {
+      await recordDemoInterest(targetBusinessId);
+      return "demo";
+    }
+    throw error;
+  }
+}

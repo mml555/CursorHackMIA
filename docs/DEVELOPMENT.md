@@ -23,13 +23,16 @@ cp .env.example .env.local   # Clerk keys + BACKEND_API_URL + Supabase (see .env
 
 # 3. Database (local Supabase — for listings, matching, etc.)
 npm run db:start    # first time
-npm run db:reset    # apply all supabase/migrations/*.sql in order
+npm run db:reset    # apply migrations + seed Austin demo businesses
 
-# 4. Run the web app
+# 4. Supabase env (paste from: supabase status -o env)
+#    NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
+
+# 5. Run the web app
 npm run dev
 ```
 
-Open http://localhost:3000 — **Sign up** redirects to `/onboarding`.
+Open http://localhost:3000 — **Open live demo** at `/demo` (seeded network). **Sign up** redirects to `/onboarding`.
 
 **Important:** Put env vars in `.env.local` at the **repo root**. Next.js does not load `.env/.env`.
 
@@ -89,7 +92,8 @@ For local dev without a real backend: `npm run mock:backend` then set `BACKEND_A
 | `npm run mock:backend` | Local mock onboarding backend |
 | `npm run test:onboarding` | Smoke test onboarding flow |
 | `npm run db:start` | Local Supabase stack |
-| `npm run db:reset` | Reset DB + run migrations |
+| `npm run db:reset` | Reset DB + run migrations + `supabase/seed.sql` |
+| `npm run db:seed` | Alias for `db:reset` |
 | `npm run db:push` | Push migrations to linked remote |
 | `npm run db:types` | Regenerate TS types from local DB |
 
@@ -107,6 +111,26 @@ For local dev without a real backend: `npm run mock:backend` then set `BACKEND_A
 See [PRD §8.3](./PRD.md) for the full auth strategy.
 
 **Note:** Onboarding uses the BFF → `BACKEND_API_URL` path above. Older routes under `/api/businesses`, `/api/listings`, etc. talk to Supabase directly.
+
+### Discovery (demo + member network)
+
+The `/demo` UI reads live data from these routes (public; no auth required):
+
+| Route | Purpose |
+|-------|---------|
+| `GET /api/discovery/network` | Approved businesses (`?metro=Austin&industry=Wellness&q=`) |
+| `GET /api/discovery/stats` | Network count and industries |
+| `GET /api/discovery/recommendations` | AI-ranked matches (demo focal: Sunrise Yoga) |
+| `POST /api/discovery/demo-interest` | Record demo swipe when viewer is not signed in |
+
+Authenticated members with an approved business also use:
+
+| Route | Purpose |
+|-------|---------|
+| `POST /api/discovery/swipe` | Member discovery swipe (interested / pass / save) |
+| `GET /api/discovery/matches` | Mutual matches after both sides swipe interested |
+
+**Seed data:** `supabase/seed.sql` inserts 6 Austin businesses with offers/needs. Re-run `npm run db:reset` after changing seed or migrations.
 
 ## Clerk CLI (optional)
 

@@ -102,11 +102,28 @@ export async function getBusinessIdBySlug(slug: string): Promise<string | null> 
   return data?.id ?? null;
 }
 
+async function getDiscoverySwipeExcludedBusinessIds(
+  businessId: string,
+): Promise<string[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("business_discovery_swipes")
+    .select("target_business_id")
+    .eq("swiper_business_id", businessId);
+
+  if (error) throw error;
+  return (data ?? []).map((row) => row.target_business_id);
+}
+
 export async function getDiscoveryRecommendations(focalBusinessId: string) {
   const graph = await loadMatchGraph({
     focalBusinessId,
     sameMetroAsFocal: true,
   });
+
+  const swipeExcluded = await getDiscoverySwipeExcludedBusinessIds(
+    focalBusinessId,
+  );
 
   const embeddings = await ensureListingEmbeddings(
     graph.businesses,
@@ -122,6 +139,7 @@ export async function getDiscoveryRecommendations(focalBusinessId: string) {
       minCombinedScore: 0.45,
       maxResults: 8,
       maxMatchesPerCounterparty: 1,
+      excludeBusinessIds: swipeExcluded,
     },
   });
 

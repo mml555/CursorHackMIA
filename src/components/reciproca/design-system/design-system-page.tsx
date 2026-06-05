@@ -3,7 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { fetchDiscoveryNetwork } from "@/lib/discovery/browser-client";
+import {
+  fetchDiscoveryNetwork,
+  fetchDiscoveryRecommendations,
+} from "@/lib/discovery/browser-client";
 import { BusinessCard } from "../business-card";
 import type { Member } from "../types";
 import {
@@ -38,6 +41,37 @@ function useSampleMembers() {
   }, []);
 
   return members;
+}
+
+function useSampleRecommendations() {
+  const [offering, setOffering] = useState("—");
+  const [looking, setLooking] = useState("—");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      try {
+        const result = await fetchDiscoveryRecommendations();
+        if (!cancelled) {
+          setOffering(result.offering);
+          setLooking(result.looking);
+        }
+      } catch {
+        if (!cancelled) {
+          setOffering("—");
+          setLooking("—");
+        }
+      }
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return { offering, looking };
 }
 
 function Section({
@@ -105,6 +139,7 @@ function Swatch({
 export function DesignSystemPage() {
   const members = useSampleMembers();
   const sampleMember = members[1] ?? members[0];
+  const { offering, looking } = useSampleRecommendations();
 
   return (
     <div style={{ background: "var(--ink)", minHeight: "100vh", padding: "32px 28px 64px" }}>
@@ -253,11 +288,11 @@ export function DesignSystemPage() {
           <div className="summary" style={{ maxWidth: 640 }}>
             <div className="cell">
               <div className="k">Offering</div>
-              <div className="v">Yoga classes, 4x/month</div>
+              <div className="v">{offering}</div>
             </div>
             <div className="cell">
               <div className="k">Looking for</div>
-              <div className="v">Brand photography</div>
+              <div className="v">{looking}</div>
             </div>
             <div className="cell">
               <Vetted />

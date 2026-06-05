@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchDiscoveryRecommendations } from "@/lib/discovery/browser-client";
+import {
+  expressDiscoveryInterest,
+  fetchDiscoveryRecommendations,
+} from "@/lib/discovery/browser-client";
 import type { DiscoveryRecommendations } from "@/lib/discovery/types";
 import { MatchCard } from "../match-card";
 import { ProposeModal } from "../propose-modal";
@@ -16,6 +19,9 @@ export function Matches({ go }: { go: Navigate }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<DiscoveryRecommendations | null>(null);
+  const [interestMode, setInterestMode] = useState<"member" | "demo" | null>(
+    null,
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -49,6 +55,7 @@ export function Matches({ go }: { go: Navigate }) {
       <div className="screen">
         <div className="container">
           <SuccessView
+            demo={interestMode === "demo"}
             onTrades={() => {
               setToast(true);
               setTimeout(() => setToast(false), 2600);
@@ -143,7 +150,10 @@ export function Matches({ go }: { go: Navigate }) {
           member={modal}
           offeringDefault={data?.offering}
           onClose={() => setModal(null)}
-          onSend={() => {
+          onSend={async () => {
+            if (!modal) return;
+            const mode = await expressDiscoveryInterest(modal.id);
+            setInterestMode(mode);
             setModal(null);
             setPhase("success");
           }}
