@@ -1,3 +1,6 @@
+# Generated remote DB bundle (npm run db:bundle:staging)
+scripts/staging-full-setup.sql
+
 # --- Secrets and environment (never commit) ---
 .env
 .env.*

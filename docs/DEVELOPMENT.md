@@ -133,6 +133,27 @@ Authenticated members with an approved business also use:
 
 **Seed data:** `scripts/seed-random-businesses.mjs` upserts 50 approved Austin businesses (6 curated demo + 44 generated) with offers/needs; runs automatically after `npm run db:reset`. Re-seed without reset: `npm run db:seed:businesses`. `supabase/seed.sql` adds demo discovery swipes only.
 
+**Remote / staging Supabase** (legacy schema → Reciproca migrations):
+
+```bash
+# Option A — Management API (recommended; needs personal access token)
+NEXT_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co \
+SUPABASE_SERVICE_ROLE_KEY=<service-role> \
+SUPABASE_ACCESS_TOKEN=sbp_... \
+npm run db:setup:remote
+
+# Option B — direct Postgres (needs DB password from Project Settings → Database)
+NEXT_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co \
+SUPABASE_SERVICE_ROLE_KEY=<service-role> \
+SUPABASE_DB_PASSWORD=... \
+npm run db:setup:remote
+
+# Option C — paste SQL in Dashboard → SQL Editor
+npm run db:bundle:staging   # writes scripts/staging-full-setup.sql
+```
+
+`db:setup:remote` drops `public`, applies all migrations, runs `seed.sql` swipes, then seeds 50 businesses.
+
 ## Clerk CLI (optional)
 
 ```bash

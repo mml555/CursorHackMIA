@@ -18,6 +18,8 @@
     "db:reset": "supabase db reset && node scripts/seed-random-businesses.mjs",
     "db:seed": "npm run db:reset",
     "db:seed:businesses": "node scripts/seed-random-businesses.mjs",
+    "db:bundle:staging": "node scripts/bundle-migrations.mjs",
+    "db:setup:remote": "node scripts/setup-remote-supabase.mjs",
     "db:push": "supabase db push",
     "db:types": "supabase gen types typescript --local > src/lib/db/database.generated.ts"
   },

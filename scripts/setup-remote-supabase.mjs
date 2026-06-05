@@ -1,17 +1,17 @@
 /**
  * Reset public schema (legacy staging), apply Reciproca migrations, seed businesses.
  *
- * Usage:
- *   DATABASE_URL="postgresql://postgres.[ref]:[password]@...:5432/postgres" \
- *     node scripts/setup-remote-supabase.mjs
+ * Auth (pick one):
+ *   SUPABASE_ACCESS_TOKEN — https://supabase.com/dashboard/account/tokens
+ *   DATABASE_URL — Postgres URL (often IPv6: db.<ref>.supabase.co)
+ *   SUPABASE_DB_PASSWORD + NEXT_PUBLIC_SUPABASE_URL
  *
- * Or:
  *   NEXT_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co \
- *   SUPABASE_DB_PASSWORD=<db-password> \
+ *   SUPABASE_SERVICE_ROLE_KEY=<service-role> \
+ *   SUPABASE_ACCESS_TOKEN=sbp_... \
  *   node scripts/setup-remote-supabase.mjs
  *
- * Optional after setup:
- *   SEED_BUSINESSES=1 (default) runs seed-random-businesses.mjs
+ * Optional: SEED_BUSINESSES=0 skips business seed.
  */
 import pg from "pg";
 import { readFileSync, readdirSync, existsSync } from "node:fs";
@@ -66,10 +66,7 @@ function buildConnectionString() {
   const ref = projectRefFromUrl(supabaseUrl);
   if (!ref) return null;
 
-  const region = process.env.SUPABASE_REGION?.trim() || "us-east-1";
-  const host =
-    process.env.SUPABASE_DB_HOST?.trim() ||
-    `db.${ref}.supabase.co`;
+  const host = process.env.SUPABASE_DB_HOST?.trim() || `db.${ref}.supabase.co`;
   const port = process.env.SUPABASE_DB_PORT?.trim() || "5432";
   const user = process.env.SUPABASE_DB_USER?.trim() || "postgres";
   const database = process.env.SUPABASE_DB_NAME?.trim() || "postgres";
@@ -83,53 +80,91 @@ function buildConnectionString() {
   return `postgresql://${user}:${encodedPassword}@${host}:${port}/${database}?sslmode=require`;
 }
 
-async function runSqlFile(client, filePath) {
+function migrationFiles() {
+  const resetPath = resolve("scripts/staging-reset-public.sql");
+  const migrationsDir = resolve("supabase/migrations");
+  const files = readdirSync(migrationsDir)
+    .filter((f) => f.endsWith(".sql"))
+    .sort()
+    .map((f) => join(migrationsDir, f));
+  const seedSqlPath = resolve("supabase/seed.sql");
+  return existsSync(seedSqlPath)
+    ? [resetPath, ...files, seedSqlPath]
+    : [resetPath, ...files];
+}
+
+async function runSqlFilePg(client, filePath) {
   const sql = readFileSync(filePath, "utf8");
   console.log(`Applying ${filePath}...`);
   await client.query(sql);
 }
 
-async function main() {
-  const connectionString = buildConnectionString();
-  if (!connectionString) {
-    console.error(
-      "Missing DATABASE_URL or NEXT_PUBLIC_SUPABASE_URL + SUPABASE_DB_PASSWORD.",
+async function runSqlFileManagementApi(projectRef, accessToken, filePath) {
+  const sql = readFileSync(filePath, "utf8");
+  console.log(`Applying ${filePath} (Management API)...`);
+  const response = await fetch(
+    `https://api.supabase.com/v1/projects/${projectRef}/database/query`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query: sql }),
+    },
+  );
+  const body = await response.text();
+  if (!response.ok) {
+    throw new Error(
+      `Management API ${response.status} for ${filePath}: ${body.slice(0, 500)}`,
     );
-    console.error(
-      "Get the DB password from Supabase Dashboard → Project Settings → Database.",
-    );
-    process.exit(1);
   }
+}
 
+async function applyMigrationsPg(connectionString) {
   const client = new Client({
     connectionString,
     ssl: { rejectUnauthorized: false },
   });
-
   await client.connect();
   console.log("Connected to remote Postgres.");
-
   try {
-    const resetPath = resolve("scripts/staging-reset-public.sql");
-    await runSqlFile(client, resetPath);
-
-    const migrationsDir = resolve("supabase/migrations");
-    const files = readdirSync(migrationsDir)
-      .filter((f) => f.endsWith(".sql"))
-      .sort();
-
-    for (const file of files) {
-      await runSqlFile(client, join(migrationsDir, file));
+    for (const filePath of migrationFiles()) {
+      await runSqlFilePg(client, filePath);
     }
-
-    const seedSqlPath = resolve("supabase/seed.sql");
-    if (existsSync(seedSqlPath)) {
-      await runSqlFile(client, seedSqlPath);
-    }
-
-    console.log("Schema migrations applied.");
   } finally {
     await client.end();
+  }
+}
+
+async function applyMigrationsManagementApi(projectRef, accessToken) {
+  for (const filePath of migrationFiles()) {
+    await runSqlFileManagementApi(projectRef, accessToken, filePath);
+  }
+}
+
+async function main() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const projectRef = supabaseUrl ? projectRefFromUrl(supabaseUrl) : null;
+  const accessToken = process.env.SUPABASE_ACCESS_TOKEN?.trim();
+  const connectionString = buildConnectionString();
+
+  if (accessToken && projectRef) {
+    await applyMigrationsManagementApi(projectRef, accessToken);
+    console.log("Schema migrations applied via Management API.");
+  } else if (connectionString) {
+    await applyMigrationsPg(connectionString);
+    console.log("Schema migrations applied via Postgres.");
+  } else {
+    console.error(
+      "Missing credentials. Provide one of:\n" +
+        "  SUPABASE_ACCESS_TOKEN + NEXT_PUBLIC_SUPABASE_URL\n" +
+        "  DATABASE_URL\n" +
+        "  SUPABASE_DB_PASSWORD + NEXT_PUBLIC_SUPABASE_URL\n\n" +
+        "Access token: https://supabase.com/dashboard/account/tokens\n" +
+        "DB password: Project Settings → Database",
+    );
+    process.exit(1);
   }
 
   if (process.env.SEED_BUSINESSES !== "0") {
