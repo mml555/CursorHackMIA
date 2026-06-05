@@ -28,24 +28,25 @@ export function TopNav({
   ];
 
   return (
-    <nav className="nav">
+    <nav className="nav" aria-label="Main">
       <button
         type="button"
-        className="brand"
-        style={{ cursor: "pointer", background: "none", border: "none", padding: 0 }}
+        className="brand brand-btn"
         onClick={() => go("landing")}
+        aria-label="Reciproca home"
       >
         <Mark size={30} />
         <span className="brand-wm">Reciproca</span>
         <span className="brand-beta">BETA</span>
       </button>
-      <div className="seg">
+      <div className="seg nav-scroll">
         {links.map((l) => (
           <button
             key={l.id}
             type="button"
             className={"seg-link" + (screen === l.id ? " on" : "")}
             onClick={() => go(l.id)}
+            aria-current={screen === l.id ? "page" : undefined}
           >
             {l.label}
             {l.n && <span className="seg-n">{l.n}</span>}
@@ -53,17 +54,17 @@ export function TopNav({
         ))}
       </div>
       <div className="nav-right">
-        <span className="nav-status">
+        <span className="nav-status nav-hide-sm">
           <span className="nav-status-dot" />
           {summary.total} vetted
         </span>
-        <Button variant="ghost" size="sm" onClick={() => go("join")}>
+        <Button variant="ghost" size="sm" className="nav-hide-sm" onClick={() => go("join")}>
           Apply
         </Button>
         <Button variant="primary" size="sm" onClick={() => go("matches")}>
           <IconArrow size={14} stroke="#0E0F11" /> Matches
         </Button>
-        <span className="avatar" title={metroLabel}>
+        <span className="avatar nav-hide-sm" title={metroLabel}>
           {metroLabel.slice(0, 1).toUpperCase()}
         </span>
       </div>

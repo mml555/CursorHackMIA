@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   expressDiscoveryInterest,
   fetchDiscoveryRecommendations,
@@ -10,7 +10,15 @@ import { MatchCard } from "../match-card";
 import { ProposeModal } from "../propose-modal";
 import { SuccessView } from "../success-view";
 import type { Member, Match, Navigate } from "../types";
-import { IconCheck, Vetted } from "../primitives";
+import {
+  DemoBanner,
+  EmptyState,
+  ErrorState,
+  IconCheck,
+  PageHeader,
+  SkeletonMatchCard,
+  Vetted,
+} from "../primitives";
 
 export function Matches({ go }: { go: Navigate }) {
   const [modal, setModal] = useState<Member | null>(null);
@@ -22,6 +30,13 @@ export function Matches({ go }: { go: Navigate }) {
   const [interestMode, setInterestMode] = useState<"member" | "demo" | null>(
     null,
   );
+  const [reloadKey, setReloadKey] = useState(0);
+
+  const retry = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    setReloadKey((k) => k + 1);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -35,9 +50,7 @@ export function Matches({ go }: { go: Navigate }) {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(
-            err instanceof Error ? err.message : "Failed to load matches",
-          );
+          setError(err instanceof Error ? err.message : "Failed to load matches");
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -48,7 +61,7 @@ export function Matches({ go }: { go: Navigate }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [reloadKey]);
 
   if (phase === "success") {
     return (
@@ -68,7 +81,7 @@ export function Matches({ go }: { go: Navigate }) {
           />
         </div>
         {toast && (
-          <div className="toast">
+          <div className="toast" role="status">
             <span className="vetted-dot">
               <IconCheck size={15} stroke="var(--success)" />
             </span>
@@ -85,20 +98,26 @@ export function Matches({ go }: { go: Navigate }) {
     <div className="screen">
       <div className="matches-wrap">
         <div className="matches-glow" />
-        <div className="container" style={{ position: "relative" }}>
-          <div className="section-head" style={{ marginBottom: 20 }}>
-            <h1 style={{ fontSize: 40, margin: 0 }}>Your matches</h1>
-            <span className="progress-pill">
-              <span
-                className="reason-dot"
-                style={{
-                  background: "var(--teal)",
-                  boxShadow: "0 0 8px var(--teal)",
-                }}
-              />
-              AI-ranked by fit
-            </span>
-          </div>
+        <div className="container page-relative">
+          <PageHeader
+            title="Your matches"
+            badge={
+              <span className="progress-pill">
+                <span
+                  className="reason-dot"
+                  style={{
+                    background: "var(--teal)",
+                    boxShadow: "0 0 8px var(--teal)",
+                  }}
+                />
+                AI-ranked by fit
+              </span>
+            }
+          />
+
+          {data?.focalBusinessName && (
+            <DemoBanner businessName={data.focalBusinessName} />
+          )}
 
           <div className="summary">
             <div className="cell">
@@ -115,33 +134,35 @@ export function Matches({ go }: { go: Navigate }) {
           </div>
 
           {loading && (
-            <p className="muted" style={{ padding: "32px 0" }}>
-              Loading matches from the network…
-            </p>
+            <div className="match-list" aria-busy="true" aria-label="Loading matches">
+              <SkeletonMatchCard />
+              <SkeletonMatchCard />
+            </div>
           )}
 
-          {error && (
-            <p className="muted" style={{ padding: "32px 0", color: "var(--danger)" }}>
-              {error}
-            </p>
-          )}
+          {error && <ErrorState message={error} onRetry={retry} />}
 
           {!loading && !error && matches.length === 0 && (
-            <p className="muted" style={{ padding: "32px 0" }}>
-              No matches yet. Check back after more businesses join the network.
-            </p>
+            <EmptyState
+              title="No matches yet"
+              message="More businesses are joining the network. Browse members or check back soon."
+              actionLabel="Browse network"
+              onAction={() => go("network")}
+            />
           )}
 
-          <div className="match-list">
-            {matches.map((mt, i) => (
-              <MatchCard
-                key={mt.member.id}
-                match={mt}
-                index={i}
-                onPropose={(m) => setModal(m)}
-              />
-            ))}
-          </div>
+          {!loading && !error && matches.length > 0 && (
+            <div className="match-list">
+              {matches.map((mt, i) => (
+                <MatchCard
+                  key={mt.member.id}
+                  match={mt}
+                  index={i}
+                  onPropose={(m) => setModal(m)}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -160,7 +181,7 @@ export function Matches({ go }: { go: Navigate }) {
         />
       )}
       {toast && (
-        <div className="toast">
+        <div className="toast" role="status">
           <span className="vetted-dot">
             <IconCheck size={15} stroke="var(--success)" />
           </span>

@@ -60,22 +60,39 @@ export function OnboardingShell({
           </Link>
         </div>
 
-        <nav className="grid gap-2 sm:grid-cols-5">
-          {ONBOARDING_STEPS.map((item, index) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={`rounded-xl border px-3 py-3 text-sm ${
-                item.id === step
-                  ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
-                  : index <= currentIndex
-                    ? "border-zinc-300 bg-white text-zinc-700 dark:border-zinc-700 dark:bg-zinc-950"
-                    : "border-dashed border-zinc-200 text-zinc-400 dark:border-zinc-800"
-              }`}
-            >
-              {item.label}
-            </Link>
-          ))}
+        <nav aria-label="Onboarding progress">
+          <div className="mb-3 flex items-center justify-between text-sm text-zinc-500">
+            <span>
+              Step {currentIndex + 1} of {ONBOARDING_STEPS.length}
+            </span>
+            <span>{ONBOARDING_STEPS[currentIndex]?.label}</span>
+          </div>
+          <div className="mb-4 h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+            <div
+              className="h-full rounded-full bg-amber-500 transition-all duration-300"
+              style={{
+                width: `${((currentIndex + 1) / ONBOARDING_STEPS.length) * 100}%`,
+              }}
+            />
+          </div>
+          <div className="grid gap-2 overflow-x-auto sm:grid-cols-5">
+            {ONBOARDING_STEPS.map((item, index) => (
+              <Link
+                key={item.id}
+                href={item.href}
+                aria-current={item.id === step ? "step" : undefined}
+                className={`rounded-xl border px-3 py-3 text-sm whitespace-nowrap ${
+                  item.id === step
+                    ? "border-amber-500 bg-amber-50 text-amber-950 dark:border-amber-500 dark:bg-amber-950/30 dark:text-amber-100"
+                    : index <= currentIndex
+                      ? "border-zinc-300 bg-white text-zinc-700 dark:border-zinc-700 dark:bg-zinc-950"
+                      : "border-dashed border-zinc-200 text-zinc-400 dark:border-zinc-800"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
         </nav>
 
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
@@ -135,7 +152,7 @@ export function SubmitButton({
     <button
       type="submit"
       disabled={disabled}
-      className="rounded-full bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
+      className="rounded-full bg-amber-500 px-5 py-2.5 text-sm font-semibold text-zinc-900 transition hover:bg-amber-400 disabled:opacity-50"
     >
       {label}
     </button>

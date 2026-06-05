@@ -6,9 +6,9 @@ export function LandingNav({ go }: { go: Navigate }) {
     <nav className="nav">
       <button
         type="button"
-        className="brand"
-        style={{ cursor: "pointer", background: "none", border: "none", padding: 0 }}
+        className="brand brand-btn"
         onClick={() => go("landing")}
+        aria-label="Reciproca home"
       >
         <Mark size={24} /> Reciproca
       </button>

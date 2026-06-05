@@ -222,12 +222,72 @@ a { color: inherit; text-decoration: none; }
   display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(34,197,94,.25); }
 .success-mark svg { width: 34px; height: 34px; }
 
+/* ---------- Page header ---------- */
+.page-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+.page-title { font-size: var(--h1-size); font-weight: var(--h1-weight); line-height: var(--h1-lh); letter-spacing: var(--h1-track); margin: 0; }
+.page-subtitle { margin: 8px 0 0; color: var(--text-2); font-size: 15px; }
+.page-header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.page-pad-y { padding-top: 36px; padding-bottom: 56px; }
+.page-relative { position: relative; }
+
+/* ---------- Demo banner ---------- */
+.demo-banner { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding: 12px 16px;
+  border-radius: var(--r-input); border: 1px solid rgba(240,165,0,.35); background: rgba(240,165,0,.08);
+  font-size: 13px; color: var(--text-2); }
+.demo-banner strong { color: var(--text-1); font-weight: 600; }
+.demo-banner-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 10px var(--amber-glow); flex: none; }
+
+/* ---------- Join path cards ---------- */
+.path-grid { display: grid; gap: 16px; }
+.path-card { padding: 28px; }
+.path-card-featured { border: 1px solid var(--amber); box-shadow: 0 0 0 1px rgba(240,165,0,.15); }
+.path-card h2 { font-size: 24px; margin: 0 0 10px; }
+.path-card p { margin: 0 0 20px; line-height: 1.6; }
+.path-card-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+/* ---------- Skeleton loaders ---------- */
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.skeleton { border-radius: 8px; background: linear-gradient(90deg, var(--surface-raised) 0%, #2a2d35 50%, var(--surface-raised) 100%);
+  background-size: 200% 100%; animation: shimmer 1.4s ease-in-out infinite; }
+.skeleton-card { pointer-events: none; }
+.skeleton-chip { width: 44px; height: 44px; border-radius: 50%; margin-bottom: 14px; }
+.skeleton-ring { width: 64px; height: 64px; border-radius: 50%; }
+.skeleton-line { height: 14px; margin-top: 10px; }
+.skeleton-line.lg { width: 70%; height: 18px; }
+.skeleton-line.md { width: 55%; }
+.skeleton-line.sm { width: 40%; }
+.skeleton-reason { height: 72px; margin-top: 18px; border-radius: 12px; }
+
+/* ---------- Empty / error states ---------- */
+.empty-state { text-align: center; padding: 48px 24px; border: 1px dashed var(--hairline); border-radius: var(--r-card); }
+.empty-state-title { font-size: 18px; font-weight: 600; margin: 0 0 8px; color: var(--text-1); }
+.empty-state-message { margin: 0 0 20px; color: var(--text-2); max-width: 420px; margin-inline: auto; line-height: 1.55; }
+.error-state { border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.04); }
+
+/* ---------- Nav mobile ---------- */
+.nav-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.nav-scroll::-webkit-scrollbar { display: none; }
+.nav-hide-sm { display: flex; }
+.brand-btn { cursor: pointer; background: none; border: none; padding: 0; }
+
 @media (max-width: 920px) {
   .grid, .value-row { grid-template-columns: 1fr 1fr; }
   .hero h1 { font-size: 44px; }
+  .nav { gap: 14px; padding: 0 16px; }
+  .nav-hide-sm { display: none; }
+  .seg { margin-left: 0; flex: 1; min-width: 0; }
 }
 @media (max-width: 640px) {
   .grid, .value-row, .field-grid { grid-template-columns: 1fr; }
   .summary { grid-template-columns: 1fr; }
+  .summary .cell { border-right: none; border-bottom: 1px solid var(--hairline); }
+  .summary .cell:last-child { border-bottom: none; }
   .match-card { grid-template-columns: 1fr; }
+  .container, .container-narrow { padding: 0 16px; }
+  .page-title { font-size: 32px; }
+  .hero { padding: 64px 0 48px; }
+  .hero h1 { font-size: 36px; }
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .search { min-width: 0; width: 100%; }
+  .nav-right .btn-ghost { display: none; }
 }
