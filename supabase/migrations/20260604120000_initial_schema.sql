@@ -1,206 +1,356 @@
 -- =============================================================================
--- Business Banter — initial schema
--- Run in Supabase SQL Editor (or via supabase db push)
+-- Reciproca MVP schema (see docs/PRD.md §9)
+-- Auth: Clerk (identity) — Supabase is data-only (no auth.users / auth.uid() RLS)
+--
+-- profiles rows are upserted by the Clerk webhook (user.created / user.updated)
+-- via service role — see src/app/api/webhooks/clerk and src/lib/clerk/admin.ts
+--
+-- MVP: Route Handlers validate Clerk sessions, then query with service role.
+-- RLS is enabled deny-by-default; policies added in Phase 2 with Clerk JWT.
 -- =============================================================================
 
--- Extensions
-create extension if not exists "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- -----------------------------------------------------------------------------
--- Enums (bracket labels match UI copy; store snake_case in DB)
--- -----------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------
+-- Enums
+-- ---------------------------------------------------------------------------
 
-create type public.revenue_bracket as enum (
-  'under_100k',
-  '100k_500k',
-  '500k_1m',
-  '1m_5m',
-  '5m_10m',
-  '10m_plus',
-  'prefer_not_to_say'
+CREATE TYPE public.business_status AS ENUM (
+  'pending',
+  'approved',
+  'rejected',
+  'suspended'
 );
 
-create type public.company_size_bracket as enum (
-  'solo',           -- 1
-  '2_10',
-  '11_50',
-  '51_200',
-  '201_500',
-  '500_plus'
+CREATE TYPE public.listing_type AS ENUM ('offer', 'need');
+
+CREATE TYPE public.proposal_status AS ENUM (
+  'draft',
+  'published',
+  'pending_acceptance',
+  'matched',
+  'confirmed',
+  'in_progress',
+  'completed',
+  'rated',
+  'cancelled',
+  'disputed'
 );
 
-create type public.service_value_bracket as enum (
-  'under_1k',
-  '1k_5k',
-  '5k_15k',
-  '15k_50k',
-  '50k_plus',
-  'prefer_not_to_say'
-);
+CREATE TYPE public.swipe_action AS ENUM ('interested', 'pass', 'save');
 
--- -----------------------------------------------------------------------------
--- profiles — one row per auth user (contact / identity)
--- -----------------------------------------------------------------------------
+CREATE TYPE public.member_role AS ENUM ('owner', 'member');
 
-create table public.profiles (
-  id            uuid primary key references auth.users (id) on delete cascade,
-  first_name    text not null,
-  last_name     text not null,
-  phone         text not null,
-  email         text not null,
-  created_at    timestamptz not null default now(),
-  updated_at    timestamptz not null default now(),
+CREATE TYPE public.trade_type AS ENUM ('direct', 'multi_party');
 
-  constraint profiles_first_name_len check (char_length(trim(first_name)) >= 1),
-  constraint profiles_last_name_len  check (char_length(trim(last_name)) >= 1),
-  constraint profiles_phone_len      check (char_length(trim(phone)) >= 7),
-  constraint profiles_email_format   check (email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$')
-);
+-- ---------------------------------------------------------------------------
+-- Shared trigger: updated_at
+-- ---------------------------------------------------------------------------
 
-comment on table public.profiles is 'Account holder contact info; id matches auth.users';
-comment on column public.profiles.phone is 'E.164 recommended in app layer; stored as text';
-
-create index profiles_email_idx on public.profiles (lower(email));
-
--- -----------------------------------------------------------------------------
--- businesses — one primary business per owner for MVP
--- -----------------------------------------------------------------------------
-
-create table public.businesses (
-  id                          uuid primary key default gen_random_uuid(),
-  owner_id                    uuid not null references public.profiles (id) on delete cascade,
-  business_name               text not null,
-  industry                    text not null,
-  location                    text not null,  -- general: e.g. "Austin, TX" or "UK — Remote"
-  revenue_bracket             public.revenue_bracket not null,
-  company_size                public.company_size_bracket not null,
-  estimated_service_value     public.service_value_bracket not null,
-  created_at                  timestamptz not null default now(),
-  updated_at                  timestamptz not null default now(),
-
-  constraint businesses_name_len     check (char_length(trim(business_name)) >= 2),
-  constraint businesses_industry_len check (char_length(trim(industry)) >= 2),
-  constraint businesses_location_len check (char_length(trim(location)) >= 2)
-);
-
-comment on table public.businesses is 'Business profile for barter; MVP: one business per user';
-comment on column public.businesses.location is 'General geography, not full street address';
-comment on column public.businesses.estimated_service_value is
-  'Typical $ value of services this business would exchange in a partnership';
-
--- MVP: one business per owner (remove this unique index later if multi-business is allowed)
-create unique index businesses_one_per_owner_idx on public.businesses (owner_id);
-
-create index businesses_industry_idx on public.businesses (industry);
-create index businesses_location_idx on public.businesses (location);
-
--- -----------------------------------------------------------------------------
--- updated_at trigger
--- -----------------------------------------------------------------------------
-
-create or replace function public.set_updated_at()
-returns trigger
-language plpgsql
-as $$
-begin
-  new.updated_at = now();
-  return new;
-end;
+CREATE OR REPLACE FUNCTION public.set_updated_at()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
 $$;
 
-create trigger profiles_set_updated_at
-  before update on public.profiles
-  for each row execute function public.set_updated_at();
+-- ---------------------------------------------------------------------------
+-- profiles — synced from Clerk webhooks (clerk_user_id = Clerk user id)
+-- ---------------------------------------------------------------------------
 
-create trigger businesses_set_updated_at
-  before update on public.businesses
-  for each row execute function public.set_updated_at();
+CREATE TABLE public.profiles (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  clerk_user_id text NOT NULL UNIQUE,
+  email text NOT NULL,
+  full_name text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT profiles_email_format CHECK (
+    email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$'
+  )
+);
 
--- -----------------------------------------------------------------------------
--- Auto-create profile on sign-up (email from auth; names filled in onboarding/sign-up)
--- -----------------------------------------------------------------------------
+COMMENT ON TABLE public.profiles IS
+  'Account holder; clerk_user_id is the Clerk user id (user_…). Synced via webhook.';
+COMMENT ON COLUMN public.profiles.full_name IS
+  'Derived from Clerk first_name + last_name on user.created / user.updated';
 
-create or replace function public.handle_new_user()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
-begin
-  insert into public.profiles (id, first_name, last_name, phone, email)
-  values (
-    new.id,
-    coalesce(new.raw_user_meta_data ->> 'first_name', ''),
-    coalesce(new.raw_user_meta_data ->> 'last_name', ''),
-    coalesce(new.raw_user_meta_data ->> 'phone', ''),
-    coalesce(new.email, '')
+CREATE TRIGGER profiles_updated_at
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+CREATE INDEX profiles_clerk_user_id_idx ON public.profiles (clerk_user_id);
+CREATE INDEX profiles_email_idx ON public.profiles (lower(email));
+
+-- ---------------------------------------------------------------------------
+-- businesses
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE public.businesses (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  legal_name text NOT NULL,
+  dba text,
+  slug text UNIQUE,
+  metro text,
+  vertical text,
+  website text,
+  description text,
+  status public.business_status NOT NULL DEFAULT 'pending',
+  reputation_score numeric(4, 2),
+  ratings_count integer NOT NULL DEFAULT 0,
+  admin_notes text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT businesses_legal_name_len CHECK (char_length(trim(legal_name)) >= 2),
+  CONSTRAINT businesses_slug_format CHECK (
+    slug IS NULL OR slug ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+  )
+);
+
+COMMENT ON TABLE public.businesses IS
+  'Vetted business record; membership via business_members';
+
+CREATE TRIGGER businesses_updated_at
+  BEFORE UPDATE ON public.businesses
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+CREATE INDEX businesses_status_idx ON public.businesses (status);
+CREATE INDEX businesses_metro_vertical_idx ON public.businesses (metro, vertical);
+
+-- ---------------------------------------------------------------------------
+-- business_members — MVP: one business per user enforced in app layer
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE public.business_members (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  profile_id uuid NOT NULL REFERENCES public.profiles (id) ON DELETE CASCADE,
+  business_id uuid NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
+  role public.member_role NOT NULL DEFAULT 'owner',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (profile_id, business_id)
+);
+
+CREATE INDEX business_members_business_id_idx ON public.business_members (business_id);
+CREATE INDEX business_members_profile_id_idx ON public.business_members (profile_id);
+
+-- ---------------------------------------------------------------------------
+-- listings — offers and needs
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE public.listings (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  business_id uuid NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
+  listing_type public.listing_type NOT NULL,
+  category text NOT NULL,
+  unit text NOT NULL,
+  quantity numeric(12, 2) NOT NULL DEFAULT 1,
+  fmv_estimate numeric(12, 2),
+  notes text,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TRIGGER listings_updated_at
+  BEFORE UPDATE ON public.listings
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+CREATE INDEX listings_business_id_idx ON public.listings (business_id);
+CREATE INDEX listings_type_active_idx ON public.listings (listing_type, is_active);
+
+-- ---------------------------------------------------------------------------
+-- trade_proposals
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE public.trade_proposals (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title text NOT NULL,
+  summary text,
+  trade_type public.trade_type NOT NULL DEFAULT 'direct',
+  status public.proposal_status NOT NULL DEFAULT 'draft',
+  version_id uuid NOT NULL DEFAULT gen_random_uuid(),
+  snapshot jsonb,
+  cash_topup_display numeric(12, 2),
+  metro text,
+  vertical text,
+  created_by_clerk_id text,
+  published_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TRIGGER trade_proposals_updated_at
+  BEFORE UPDATE ON public.trade_proposals
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+CREATE INDEX trade_proposals_status_idx ON public.trade_proposals (status);
+CREATE INDEX trade_proposals_published_at_idx ON public.trade_proposals (published_at DESC);
+
+-- ---------------------------------------------------------------------------
+-- proposal_parties
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE public.proposal_parties (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  proposal_id uuid NOT NULL REFERENCES public.trade_proposals (id) ON DELETE CASCADE,
+  business_id uuid NOT NULL REFERENCES public.businesses (id) ON DELETE RESTRICT,
+  give_lines jsonb NOT NULL DEFAULT '[]'::jsonb,
+  receive_lines jsonb NOT NULL DEFAULT '[]'::jsonb,
+  estimated_fmv numeric(12, 2),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (proposal_id, business_id)
+);
+
+CREATE INDEX proposal_parties_business_id_idx ON public.proposal_parties (business_id);
+
+-- ---------------------------------------------------------------------------
+-- proposal_swipes — deck actions
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE public.proposal_swipes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  proposal_id uuid NOT NULL REFERENCES public.trade_proposals (id) ON DELETE CASCADE,
+  business_id uuid NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
+  action public.swipe_action NOT NULL,
+  reason_tags text[] DEFAULT '{}',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (proposal_id, business_id)
+);
+
+CREATE TRIGGER proposal_swipes_updated_at
+  BEFORE UPDATE ON public.proposal_swipes
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+CREATE INDEX proposal_swipes_business_id_idx ON public.proposal_swipes (business_id);
+
+-- ---------------------------------------------------------------------------
+-- proposal_acceptances — explicit confirm for match
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE public.proposal_acceptances (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  proposal_id uuid NOT NULL REFERENCES public.trade_proposals (id) ON DELETE CASCADE,
+  business_id uuid NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
+  tax_acknowledged boolean NOT NULL DEFAULT false,
+  accepted_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (proposal_id, business_id)
+);
+
+CREATE INDEX proposal_acceptances_proposal_id_idx ON public.proposal_acceptances (proposal_id);
+
+-- ---------------------------------------------------------------------------
+-- trade_events — audit log
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE public.trade_events (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  proposal_id uuid NOT NULL REFERENCES public.trade_proposals (id) ON DELETE CASCADE,
+  from_status public.proposal_status,
+  to_status public.proposal_status NOT NULL,
+  actor_clerk_id text,
+  actor_business_id uuid REFERENCES public.businesses (id) ON DELETE SET NULL,
+  payload jsonb DEFAULT '{}'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX trade_events_proposal_id_idx ON public.trade_events (proposal_id, created_at DESC);
+
+-- ---------------------------------------------------------------------------
+-- vendor_ratings
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE public.vendor_ratings (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  trade_id uuid NOT NULL REFERENCES public.trade_proposals (id) ON DELETE CASCADE,
+  rater_business_id uuid NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
+  rated_business_id uuid NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
+  score smallint NOT NULL CHECK (score BETWEEN 1 AND 5),
+  tags text[] DEFAULT '{}',
+  comment text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (trade_id, rater_business_id, rated_business_id),
+  CHECK (rater_business_id <> rated_business_id)
+);
+
+CREATE INDEX vendor_ratings_rated_business_id_idx ON public.vendor_ratings (rated_business_id);
+
+-- ---------------------------------------------------------------------------
+-- invoices
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE public.invoices (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  trade_id uuid NOT NULL REFERENCES public.trade_proposals (id) ON DELETE CASCADE,
+  business_id uuid NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
+  storage_path text,
+  line_items jsonb NOT NULL DEFAULT '[]'::jsonb,
+  total_fmv numeric(12, 2),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX invoices_trade_id_idx ON public.invoices (trade_id);
+
+-- ---------------------------------------------------------------------------
+-- verification_documents — private bucket references
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE public.verification_documents (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  business_id uuid NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
+  storage_path text NOT NULL,
+  file_name text NOT NULL,
+  mime_type text,
+  reviewed_at timestamptz,
+  reviewed_by_clerk_id text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX verification_documents_business_id_idx ON public.verification_documents (business_id);
+
+-- ---------------------------------------------------------------------------
+-- Helper: onboarding gate (Phase 2 — requires Clerk JWT in Supabase)
+-- MVP: use getBusinessWithMembership() in app code instead.
+-- ---------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION public.user_has_business()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.business_members bm
+    JOIN public.profiles p ON p.id = bm.profile_id
+    WHERE p.clerk_user_id = auth.jwt() ->> 'sub'
   );
-  return new;
-end;
 $$;
 
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute function public.handle_new_user();
+COMMENT ON FUNCTION public.user_has_business() IS
+  'Returns true when JWT sub matches a profile with a business_members row. '
+  'Requires Clerk third-party auth JWT (Phase 2). MVP uses service role + app checks.';
 
--- -----------------------------------------------------------------------------
--- Row Level Security
--- -----------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------
+-- RLS — deny-by-default; MVP uses service role + Clerk checks in app code
+-- ---------------------------------------------------------------------------
 
-alter table public.profiles enable row level security;
-alter table public.businesses enable row level security;
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.businesses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.business_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.listings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.trade_proposals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.proposal_parties ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.proposal_swipes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.proposal_acceptances ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.trade_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vendor_ratings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.verification_documents ENABLE ROW LEVEL SECURITY;
 
--- profiles: own row only
-create policy "profiles_select_own"
-  on public.profiles for select
-  using (auth.uid() = id);
-
-create policy "profiles_insert_own"
-  on public.profiles for insert
-  with check (auth.uid() = id);
-
-create policy "profiles_update_own"
-  on public.profiles for update
-  using (auth.uid() = id)
-  with check (auth.uid() = id);
-
--- businesses: own rows only
-create policy "businesses_select_own"
-  on public.businesses for select
-  using (auth.uid() = owner_id);
-
-create policy "businesses_insert_own"
-  on public.businesses for insert
-  with check (auth.uid() = owner_id);
-
-create policy "businesses_update_own"
-  on public.businesses for update
-  using (auth.uid() = owner_id)
-  with check (auth.uid() = owner_id);
-
-create policy "businesses_delete_own"
-  on public.businesses for delete
-  using (auth.uid() = owner_id);
-
--- -----------------------------------------------------------------------------
--- Helper for middleware: “has this user completed business onboarding?”
--- -----------------------------------------------------------------------------
-
-create or replace function public.user_has_business()
-returns boolean
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select exists (
-    select 1
-    from public.businesses b
-    where b.owner_id = auth.uid()
-  );
-$$;
-
-grant execute on function public.user_has_business() to authenticated;
-
--- Optional: expose a single read view for dashboard (own data only via RLS on base tables)
--- create view public.my_business_summary as ...
+-- Phase 2: add policies when Clerk JWT is wired into Supabase
+-- (https://clerk.com/docs/integrations/databases/supabase)

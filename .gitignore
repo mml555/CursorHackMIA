@@ -264,6 +264,9 @@ vendor/
 composer.lock.bak
 package-lock.json.bak
 
+# --- Clerk CLI (local keyless / session) ---
+.clerk/
+
 # --- Cursor (local only — do not push to GitHub) ---
 # NOTE: Ignoring .cursor/ affects GIT only. Cursor still loads rules from
 # .cursor/rules/*.mdc on disk in this workspace. Do not add .cursor/rules to
