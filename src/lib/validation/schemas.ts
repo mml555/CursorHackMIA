@@ -73,6 +73,25 @@ export const vendorRatingSchema = z.object({
   comment: z.string().max(1000).optional(),
 });
 
+export const tradeActionSchema = z.object({
+  proposalId: z.string().uuid(),
+});
+
+export const disputeTradeSchema = z.object({
+  proposalId: z.string().uuid(),
+  reason: z.string().max(1000).optional(),
+});
+
+export const adminBusinessVettingSchema = z.object({
+  action: z.enum(["approve", "reject", "suspend"]),
+  adminNotes: z.string().max(2000).optional(),
+});
+
+export const resolveDisputeSchema = z.object({
+  targetStatus: z.enum(["confirmed", "in_progress", "cancelled"]),
+  resolutionNote: z.string().max(2000).optional(),
+});
+
 export type BusinessPhotoInput = z.infer<typeof businessPhotoInputSchema>;
 export type CreateBusinessInput = z.infer<typeof createBusinessSchema>;
 export type CreateListingInput = z.infer<typeof createListingSchema>;
@@ -80,3 +99,7 @@ export type SwipeProposalInput = z.infer<typeof swipeProposalSchema>;
 export type AcceptProposalInput = z.infer<typeof acceptProposalSchema>;
 export type CreateProposalInput = z.infer<typeof createProposalSchema>;
 export type VendorRatingInput = z.infer<typeof vendorRatingSchema>;
+export type TradeActionInput = z.infer<typeof tradeActionSchema>;
+export type DisputeTradeInput = z.infer<typeof disputeTradeSchema>;
+export type AdminBusinessVettingInput = z.infer<typeof adminBusinessVettingSchema>;
+export type ResolveDisputeInput = z.infer<typeof resolveDisputeSchema>;

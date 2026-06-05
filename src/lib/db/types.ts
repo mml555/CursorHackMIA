@@ -533,3 +533,10 @@ export type BusinessMember =
 export type Listing = Database["public"]["Tables"]["listings"]["Row"];
 export type TradeProposal =
   Database["public"]["Tables"]["trade_proposals"]["Row"];
+export type ProposalParty =
+  Database["public"]["Tables"]["proposal_parties"]["Row"];
+export type ProposalAcceptance =
+  Database["public"]["Tables"]["proposal_acceptances"]["Row"];
+export type VendorRating =
+  Database["public"]["Tables"]["vendor_ratings"]["Row"];
+export type Invoice = Database["public"]["Tables"]["invoices"]["Row"];

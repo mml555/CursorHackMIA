@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { AuthError } from "@/lib/clerk/auth";
 import { InvalidTransitionError } from "@/lib/trades/state-machine";
+import { TradeError } from "@/lib/trades/errors";
 
 export type ApiErrorBody = {
   error: {
@@ -36,6 +37,10 @@ export function handleRouteError(error: unknown) {
 
   if (error instanceof InvalidTransitionError) {
     return apiError("INVALID_TRANSITION", error.message, 409);
+  }
+
+  if (error instanceof TradeError) {
+    return apiError(error.code, error.message, error.status);
   }
 
   console.error("[api]", error);

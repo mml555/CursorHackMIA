@@ -1,5 +1,6 @@
 import { requireApprovedBusinessMember } from "@/lib/clerk/auth";
 import { createAdminClient } from "@/lib/supabase/server";
+import { maybeAdvanceToPendingAcceptance } from "@/lib/trades/service";
 import { swipeProposalSchema } from "@/lib/validation/schemas";
 import { apiSuccess, handleRouteError } from "@/lib/api/errors";
 
@@ -91,6 +92,8 @@ export async function POST(req: Request) {
         actor_business_id: business.id,
         payload: { action: "interested" },
       });
+
+      await maybeAdvanceToPendingAcceptance(body.proposalId);
     }
 
     return apiSuccess({ swipe });
