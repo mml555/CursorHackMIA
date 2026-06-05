@@ -5,16 +5,12 @@
 --   1. Deck: approved businesses the viewer has not swiped on yet
 --   2. Card shows company name, industry (vertical), primary "looking for" needs
 --   3. Expand/dropdown reveals full profile + all active offer/need listings
---   4. Swipe interested / pass (save optional) → persisted in business_discovery_swipes
---   5. Mutual interested → row in business_matches; visible on "My matches"
+--   4. Swipe interested / pass (save optional) → business_discovery_swipes
+--   5. Mutual interested → business_matches
 --
 -- Distinct from proposal_swipes (admin-authored trade proposals).
--- MVP uses service role + Clerk checks in app code (RLS deny-by-default).
+-- Profile media columns/views extended in 20260605123000_business_profile_media.sql
 -- =============================================================================
-
--- ---------------------------------------------------------------------------
--- business_discovery_swipes — yes/no/save on another business profile
--- ---------------------------------------------------------------------------
 
 CREATE TABLE public.business_discovery_swipes (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -43,10 +39,6 @@ CREATE INDEX business_discovery_swipes_target_idx
 CREATE INDEX business_discovery_swipes_swiper_action_idx
   ON public.business_discovery_swipes (swiper_business_id, action);
 
--- ---------------------------------------------------------------------------
--- business_matches — created when both businesses swipe interested
--- ---------------------------------------------------------------------------
-
 CREATE TABLE public.business_matches (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   business_a_id uuid NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
@@ -63,10 +55,6 @@ COMMENT ON TABLE public.business_matches IS
 CREATE INDEX business_matches_business_a_idx ON public.business_matches (business_a_id);
 CREATE INDEX business_matches_business_b_idx ON public.business_matches (business_b_id);
 CREATE INDEX business_matches_matched_at_idx ON public.business_matches (matched_at DESC);
-
--- ---------------------------------------------------------------------------
--- Trigger: insert match when reverse interested swipe exists
--- ---------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION public.create_business_match_if_mutual()
 RETURNS TRIGGER
@@ -113,10 +101,6 @@ CREATE TRIGGER business_discovery_swipes_create_match
   FOR EACH ROW
   EXECUTE FUNCTION public.create_business_match_if_mutual();
 
--- ---------------------------------------------------------------------------
--- Helper: aggregate active listings as JSON for card detail / dropdown
--- ---------------------------------------------------------------------------
-
 CREATE OR REPLACE FUNCTION public.business_listings_json(
   p_business_id uuid,
   p_listing_type public.listing_type
@@ -150,11 +134,7 @@ $$;
 COMMENT ON FUNCTION public.business_listings_json IS
   'Active offer or need listings for discovery card detail panels';
 
--- ---------------------------------------------------------------------------
--- View: discovery card fields (deck face + expanded detail)
--- ---------------------------------------------------------------------------
-
-CREATE OR REPLACE VIEW public.business_discovery_cards AS
+CREATE VIEW public.business_discovery_cards AS
 SELECT
   b.id AS business_id,
   COALESCE(NULLIF(trim(b.dba), ''), b.legal_name) AS company_name,
@@ -181,17 +161,13 @@ FROM public.businesses b
 WHERE b.status = 'approved';
 
 COMMENT ON VIEW public.business_discovery_cards IS
-  'Approved business profiles for swipe deck; industry = vertical; looking_for = active needs';
+  'Approved business profiles for swipe deck; industry = vertical';
 
--- ---------------------------------------------------------------------------
--- View: matched partners with card fields (my matches screen)
--- ---------------------------------------------------------------------------
-
-CREATE OR REPLACE VIEW public.business_match_details AS
+CREATE VIEW public.business_match_details AS
 SELECT
   m.id AS match_id,
   m.matched_at,
-  viewer.business_id AS viewer_business_id,
+  pairs.viewer_business_id,
   partner.business_id AS partner_business_id,
   partner.company_name,
   partner.legal_name,
@@ -215,11 +191,7 @@ JOIN public.business_discovery_cards partner
   ON partner.business_id = pairs.partner_business_id;
 
 COMMENT ON VIEW public.business_match_details IS
-  'One row per match per participant; join on viewer_business_id for "my matches"';
-
--- ---------------------------------------------------------------------------
--- Function: discovery deck candidates (not yet swiped, excluding self)
--- ---------------------------------------------------------------------------
+  'One row per match per participant; join on viewer_business_id for my matches';
 
 CREATE OR REPLACE FUNCTION public.get_discovery_deck(p_swiper_business_id uuid)
 RETURNS SETOF public.business_discovery_cards
@@ -240,13 +212,6 @@ AS $$
   ORDER BY c.reputation_score DESC NULLS LAST, c.company_name;
 $$;
 
-COMMENT ON FUNCTION public.get_discovery_deck IS
-  'Businesses still in the swipe deck for p_swiper_business_id';
-
--- ---------------------------------------------------------------------------
--- Function: all mutual matches for a business
--- ---------------------------------------------------------------------------
-
 CREATE OR REPLACE FUNCTION public.get_business_matches(p_viewer_business_id uuid)
 RETURNS SETOF public.business_match_details
 LANGUAGE sql
@@ -259,13 +224,6 @@ AS $$
   WHERE m.viewer_business_id = p_viewer_business_id
   ORDER BY m.matched_at DESC;
 $$;
-
-COMMENT ON FUNCTION public.get_business_matches IS
-  'Matched partners with company name, industry, and looking_for for p_viewer_business_id';
-
--- ---------------------------------------------------------------------------
--- RLS — deny-by-default (MVP: service role + Clerk in app)
--- ---------------------------------------------------------------------------
 
 ALTER TABLE public.business_discovery_swipes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.business_matches ENABLE ROW LEVEL SECURITY;

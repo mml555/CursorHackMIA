@@ -19,7 +19,7 @@ cp .env.example .env.local
 
 # 3. Database (local Supabase)
 npm run db:start    # first time
-npm run db:reset    # apply supabase/migrations/20260604120000_initial_schema.sql
+npm run db:reset    # apply all supabase/migrations/*.sql in order
 
 # 4. Run the web app
 npm run dev
@@ -65,6 +65,7 @@ clerk doctor
 - **Clerk** is the identity provider (sessions in Next.js).
 - **Supabase** is data-only; `profiles.clerk_user_id` syncs via webhook (`user.created` / `user.updated`).
 - MVP API routes validate Clerk, then query Supabase with the **service role** (server-only).
+- RLS policies for Clerk JWT clients: [SUPABASE_RLS.md](./SUPABASE_RLS.md) and migration `20260605124000_rls_clerk_jwt.sql`.
 
 See [PRD §8.3](./PRD.md) for the full auth strategy.
 
@@ -76,8 +77,7 @@ See [PRD §8.3](./PRD.md) for the full auth strategy.
 ├── public/
 ├── supabase/
 │   ├── config.toml
-│   └── migrations/
-│       └── 20260604120000_initial_schema.sql
+│   └── migrations/           # see docs/SUPABASE_RLS.md for order
 ├── docs/
 │   ├── PRD.md
 │   └── DEVELOPMENT.md      # this file

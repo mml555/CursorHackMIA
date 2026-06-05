@@ -352,5 +352,5 @@ ALTER TABLE public.vendor_ratings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.verification_documents ENABLE ROW LEVEL SECURITY;
 
--- Phase 2: add policies when Clerk JWT is wired into Supabase
--- (https://clerk.com/docs/integrations/databases/supabase)
+-- Member policies: supabase/migrations/20260605124000_rls_clerk_jwt.sql
+-- (Clerk JWT via Supabase third-party auth; MVP API uses service role)

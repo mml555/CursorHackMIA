@@ -1,22 +1,24 @@
 -- =============================================================================
--- Business profile media — logo + custom gallery photos (onboarding)
--- Storage bucket: business-media (public read for discovery deck / matches)
+-- Business profile media — logo + gallery photos (onboarding / discovery)
+-- Extends business_discovery_cards with logo_storage_path + photos JSON
+-- Storage bucket: business-media (public read)
 -- =============================================================================
 
 ALTER TABLE public.businesses
-  ADD COLUMN logo_storage_path text;
+  ADD COLUMN IF NOT EXISTS logo_storage_path text;
 
 COMMENT ON COLUMN public.businesses.logo_storage_path IS
   'Supabase Storage path in business-media bucket; e.g. {business_id}/logo.png';
 
-ALTER TABLE public.businesses
-  ADD CONSTRAINT businesses_description_len CHECK (
-    description IS NULL OR char_length(trim(description)) >= 10
-  );
-
--- ---------------------------------------------------------------------------
--- business_photos — custom pictures shown on profile / discovery detail
--- ---------------------------------------------------------------------------
+DO $$
+BEGIN
+  ALTER TABLE public.businesses
+    ADD CONSTRAINT businesses_description_len CHECK (
+      description IS NULL OR char_length(trim(description)) >= 10
+    );
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 CREATE TABLE public.business_photos (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -27,6 +29,7 @@ CREATE TABLE public.business_photos (
   caption text,
   sort_order smallint NOT NULL DEFAULT 0,
   created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT business_photos_caption_len CHECK (
     caption IS NULL OR char_length(trim(caption)) <= 500
   ),
@@ -34,14 +37,14 @@ CREATE TABLE public.business_photos (
 );
 
 COMMENT ON TABLE public.business_photos IS
-  'Gallery images for business onboarding profile and discovery detail panel';
+  'Gallery images for business onboarding and discovery detail panel';
 
 CREATE INDEX business_photos_business_id_idx
   ON public.business_photos (business_id, sort_order, created_at);
 
--- ---------------------------------------------------------------------------
--- Storage bucket (public read for approved business profiles)
--- ---------------------------------------------------------------------------
+CREATE TRIGGER business_photos_updated_at
+  BEFORE UPDATE ON public.business_photos
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES (
@@ -55,10 +58,6 @@ ON CONFLICT (id) DO UPDATE SET
   public = EXCLUDED.public,
   file_size_limit = EXCLUDED.file_size_limit,
   allowed_mime_types = EXCLUDED.allowed_mime_types;
-
--- ---------------------------------------------------------------------------
--- Helper: gallery JSON for discovery cards
--- ---------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION public.business_photos_json(p_business_id uuid)
 RETURNS json
@@ -86,11 +85,33 @@ AS $$
 $$;
 
 COMMENT ON FUNCTION public.business_photos_json IS
-  'Ordered gallery photos for business profile detail / onboarding preview';
+  'Ordered gallery photos for business profile detail / discovery';
 
--- ---------------------------------------------------------------------------
--- Refresh discovery views with logo + photos
--- ---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.business_profile_complete(p_business_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.businesses b
+    WHERE b.id = p_business_id
+      AND b.description IS NOT NULL
+      AND char_length(trim(b.description)) >= 10
+      AND b.logo_storage_path IS NOT NULL
+      AND char_length(trim(b.logo_storage_path)) >= 1
+      AND EXISTS (
+        SELECT 1
+        FROM public.business_photos p
+        WHERE p.business_id = b.id
+      )
+  );
+$$;
+
+COMMENT ON FUNCTION public.business_profile_complete IS
+  'True when description, logo, and at least one gallery photo are present';
 
 DROP VIEW IF EXISTS public.business_match_details;
 DROP VIEW IF EXISTS public.business_discovery_cards;
@@ -157,9 +178,5 @@ JOIN public.business_discovery_cards partner
 
 COMMENT ON VIEW public.business_match_details IS
   'Matched partners with profile media and listing summary';
-
--- ---------------------------------------------------------------------------
--- RLS
--- ---------------------------------------------------------------------------
 
 ALTER TABLE public.business_photos ENABLE ROW LEVEL SECURITY;
