@@ -5,7 +5,7 @@ Two-service layout:
 | Service | Platform | Role |
 |---------|----------|------|
 | **Web app** | [Vercel](https://vercel.com) | Next.js UI, Clerk auth, BFF (`/api/*`), Supabase data routes |
-| **Onboarding API** | [Render](https://render.com) | `/onboarding/*` — draft state + finalize to Supabase |
+| **Onboarding API** | [Render](https://render.com) | `/onboarding/*`, `/discovery/*` — drafts, finalize, discovery data |
 
 Supabase stays hosted on [supabase.com](https://supabase.com). Clerk stays on [clerk.com](https://clerk.com).
 
@@ -156,6 +156,10 @@ Do not point preview builds at production Supabase without a branch DB.
 | Onboarding 401 | Clerk session; Render `CLERK_SECRET_KEY` matches Vercel |
 | Profile not found on onboarding | Clerk webhook delivered; `profiles` row exists |
 | Render health check fails | `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`; migration `20260605125000_onboarding_drafts.sql` applied |
+| Render `/health` missing `checks.supabase` | Old deploy — **Manual Deploy** on Render after pushing latest `main` |
+| Discovery 404 on Render | Same — redeploy onboarding API; `/discovery/stats` should return JSON |
+| Vercel `supabaseConnection: error` + localhost host | `NEXT_PUBLIC_SUPABASE_URL` must be `https://<ref>.supabase.co`, not `127.0.0.1` |
+| `supabase status` fails parsing `.env` | Remove invalid lines from `.env` (use `.env.local` for secrets) |
 | Clerk webhook 400 | `CLERK_WEBHOOK_SIGNING_SECRET` matches dashboard |
 
 ---
