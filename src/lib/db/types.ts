@@ -510,9 +510,106 @@ export type Database = {
         };
         Relationships: [];
       };
+      business_discovery_swipes: {
+        Row: {
+          id: string;
+          swiper_business_id: string;
+          target_business_id: string;
+          action: SwipeAction;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          swiper_business_id: string;
+          target_business_id: string;
+          action: SwipeAction;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          swiper_business_id?: string;
+          target_business_id?: string;
+          action?: SwipeAction;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      business_matches: {
+        Row: {
+          id: string;
+          business_a_id: string;
+          business_b_id: string;
+          matched_at: string;
+        };
+        Insert: {
+          id?: string;
+          business_a_id: string;
+          business_b_id: string;
+          matched_at?: string;
+        };
+        Update: {
+          id?: string;
+          business_a_id?: string;
+          business_b_id?: string;
+          matched_at?: string;
+        };
+        Relationships: [];
+      };
     };
-    Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Views: {
+      business_discovery_cards: {
+        Row: {
+          business_id: string;
+          company_name: string;
+          legal_name: string;
+          dba: string | null;
+          industry: string | null;
+          metro: string | null;
+          website: string | null;
+          description: string | null;
+          reputation_score: number | null;
+          ratings_count: number;
+          looking_for: Json;
+          offering: Json;
+          primary_looking_for: string | null;
+        };
+        Relationships: [];
+      };
+      business_match_details: {
+        Row: {
+          match_id: string;
+          matched_at: string;
+          viewer_business_id: string;
+          partner_business_id: string;
+          company_name: string;
+          legal_name: string;
+          dba: string | null;
+          industry: string | null;
+          metro: string | null;
+          website: string | null;
+          description: string | null;
+          reputation_score: number | null;
+          ratings_count: number;
+          looking_for: Json;
+          offering: Json;
+          primary_looking_for: string | null;
+        };
+        Relationships: [];
+      };
+    };
+    Functions: {
+      get_business_matches: {
+        Args: { p_viewer_business_id: string };
+        Returns: Database["public"]["Views"]["business_match_details"]["Row"][];
+      };
+      get_discovery_deck: {
+        Args: { p_swiper_business_id: string };
+        Returns: Database["public"]["Views"]["business_discovery_cards"]["Row"][];
+      };
+    };
     Enums: {
       business_status: BusinessStatus;
       listing_type: ListingType;

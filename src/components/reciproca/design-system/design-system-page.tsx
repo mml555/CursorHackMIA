@@ -2,8 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { fetchDiscoveryNetwork } from "@/lib/discovery/browser-client";
 import { BusinessCard } from "../business-card";
-import { MEMBERS } from "../data/members";
+import type { Member } from "../types";
 import {
   Button,
   Chip,
@@ -13,6 +15,30 @@ import {
   Stars,
   Vetted,
 } from "../primitives";
+
+function useSampleMembers() {
+  const [members, setMembers] = useState<Member[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      try {
+        const result = await fetchDiscoveryNetwork({ metro: "Austin" });
+        if (!cancelled) setMembers(result.members);
+      } catch {
+        if (!cancelled) setMembers([]);
+      }
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return members;
+}
 
 function Section({
   title,
@@ -77,6 +103,9 @@ function Swatch({
 }
 
 export function DesignSystemPage() {
+  const members = useSampleMembers();
+  const sampleMember = members[1] ?? members[0];
+
   return (
     <div style={{ background: "var(--ink)", minHeight: "100vh", padding: "32px 28px 64px" }}>
       <div style={{ maxWidth: 1120, margin: "0 auto" }}>
@@ -182,7 +211,7 @@ export function DesignSystemPage() {
 
         <Section title="Business card">
           <div style={{ maxWidth: 380 }}>
-            <BusinessCard member={MEMBERS[1]} />
+            {sampleMember && <BusinessCard member={sampleMember} />}
           </div>
         </Section>
 
@@ -204,7 +233,7 @@ export function DesignSystemPage() {
 
         <Section title="Monogram chips">
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-            {MEMBERS.slice(0, 4).map((m) => (
+            {members.slice(0, 4).map((m) => (
               <Chip key={m.id} name={m.name} />
             ))}
           </div>

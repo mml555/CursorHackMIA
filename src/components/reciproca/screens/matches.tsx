@@ -1,17 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { fetchDiscoveryRecommendations } from "@/lib/discovery/browser-client";
+import type { DiscoveryRecommendations } from "@/lib/discovery/types";
 import { MatchCard } from "../match-card";
 import { ProposeModal } from "../propose-modal";
 import { SuccessView } from "../success-view";
-import { MATCHES } from "../data/members";
-import type { Member, Navigate } from "../types";
+import type { Member, Match, Navigate } from "../types";
 import { IconCheck, Vetted } from "../primitives";
 
 export function Matches({ go }: { go: Navigate }) {
   const [modal, setModal] = useState<Member | null>(null);
   const [phase, setPhase] = useState<"list" | "success">("list");
   const [toast, setToast] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<DiscoveryRecommendations | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      try {
+        const recommendations = await fetchDiscoveryRecommendations();
+        if (!cancelled) {
+          setData(recommendations);
+          setError(null);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err instanceof Error ? err.message : "Failed to load matches",
+          );
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (phase === "success") {
     return (
@@ -34,12 +65,14 @@ export function Matches({ go }: { go: Navigate }) {
             <span className="vetted-dot">
               <IconCheck size={15} stroke="var(--success)" />
             </span>
-            Rating submitted. It appears on their profile after review.
+            Interest recorded. A trade proposal will follow mutual review.
           </div>
         )}
       </div>
     );
   }
+
+  const matches: Match[] = data?.matches ?? [];
 
   return (
     <div className="screen">
@@ -63,19 +96,37 @@ export function Matches({ go }: { go: Navigate }) {
           <div className="summary">
             <div className="cell">
               <div className="k">Offering</div>
-              <div className="v">Yoga classes, 4x/month</div>
+              <div className="v">{data?.offering ?? "—"}</div>
             </div>
             <div className="cell">
               <div className="k">Looking for</div>
-              <div className="v">Brand photography</div>
+              <div className="v">{data?.looking ?? "—"}</div>
             </div>
             <div className="cell">
               <Vetted />
             </div>
           </div>
 
+          {loading && (
+            <p className="muted" style={{ padding: "32px 0" }}>
+              Loading matches from the network…
+            </p>
+          )}
+
+          {error && (
+            <p className="muted" style={{ padding: "32px 0", color: "var(--danger)" }}>
+              {error}
+            </p>
+          )}
+
+          {!loading && !error && matches.length === 0 && (
+            <p className="muted" style={{ padding: "32px 0" }}>
+              No matches yet. Check back after more businesses join the network.
+            </p>
+          )}
+
           <div className="match-list">
-            {MATCHES.map((mt, i) => (
+            {matches.map((mt, i) => (
               <MatchCard
                 key={mt.member.id}
                 match={mt}
@@ -90,6 +141,7 @@ export function Matches({ go }: { go: Navigate }) {
       {modal && (
         <ProposeModal
           member={modal}
+          offeringDefault={data?.offering}
           onClose={() => setModal(null)}
           onSend={() => {
             setModal(null);
@@ -102,7 +154,7 @@ export function Matches({ go }: { go: Navigate }) {
           <span className="vetted-dot">
             <IconCheck size={15} stroke="var(--success)" />
           </span>
-          Rating submitted. It appears on their profile after review.
+          Interest recorded. A trade proposal will follow mutual review.
         </div>
       )}
     </div>

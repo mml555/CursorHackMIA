@@ -1,5 +1,8 @@
-import { MEMBERS } from "../data/members";
-import type { Navigate } from "../types";
+"use client";
+
+import { useEffect, useState } from "react";
+import { fetchDiscoveryNetwork } from "@/lib/discovery/browser-client";
+import type { DiscoverySummary, Member, Navigate } from "../types";
 import {
   Button,
   Chip,
@@ -8,7 +11,35 @@ import {
   IconSparkle,
 } from "../primitives";
 
-export function Landing({ go }: { go: Navigate }) {
+export function Landing({
+  go,
+  summary,
+}: {
+  go: Navigate;
+  summary: DiscoverySummary;
+}) {
+  const [members, setMembers] = useState<Member[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      try {
+        const result = await fetchDiscoveryNetwork({
+          metro: summary.metro ?? "Austin",
+        });
+        if (!cancelled) setMembers(result.members.slice(0, 6));
+      } catch {
+        if (!cancelled) setMembers([]);
+      }
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [summary.metro]);
+
   const values = [
     {
       ico: <IconShield size={19} />,
@@ -27,6 +58,8 @@ export function Landing({ go }: { go: Navigate }) {
     },
   ];
 
+  const metroLabel = summary.metro ?? "Austin";
+
   return (
     <div className="screen">
       <section className="hero">
@@ -39,7 +72,7 @@ export function Landing({ go }: { go: Navigate }) {
                 boxShadow: "0 0 8px var(--amber)",
               }}
             />
-            Vetted B2B trade network · Austin
+            Vetted B2B trade network · {metroLabel}
           </span>
           <h1>
             Trade the services you <b>have</b> for the ones you <b>need</b>.
@@ -75,9 +108,11 @@ export function Landing({ go }: { go: Navigate }) {
           </div>
 
           <div className="logostrip">
-            <div className="logostrip-label">47 vetted businesses in Austin</div>
+            <div className="logostrip-label">
+              {summary.total} vetted businesses in {metroLabel}
+            </div>
             <div className="logostrip-row">
-              {MEMBERS.map((m) => (
+              {members.map((m) => (
                 <span className="lname" key={m.id}>
                   <Chip name={m.name} size={28} />
                   {m.name}

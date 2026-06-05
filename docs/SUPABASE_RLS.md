@@ -20,6 +20,7 @@ Apply in timestamp order under `supabase/migrations/`:
 3. `20260605122000_business_discovery.sql` — discovery swipe deck + matches
 4. `20260605123000_business_profile_media.sql` — logo, photos, storage bucket
 5. `20260605124000_rls_clerk_jwt.sql` — Clerk JWT helpers + member policies
+6. `20260605125000_onboarding_drafts.sql` — onboarding draft state (Render API)
 
 ```bash
 npm run db:reset   # local

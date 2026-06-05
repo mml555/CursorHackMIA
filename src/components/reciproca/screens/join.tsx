@@ -126,7 +126,7 @@ export function Join({ go }: { go: Navigate }) {
               variant="primary"
               onClick={() => {
                 if (!services) setShowErr(true);
-                else go("matches");
+                else window.location.assign("/onboarding");
               }}
             >
               Submit application

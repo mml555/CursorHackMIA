@@ -1,16 +1,29 @@
-import type { Navigate, Screen } from "../types";
+"use client";
+
+import type { DiscoverySummary, Navigate, Screen } from "../types";
 import { Button, IconArrow, Mark } from "../primitives";
 
 export function TopNav({
   screen,
   go,
+  summary,
 }: {
   screen: Screen;
   go: Navigate;
+  summary: DiscoverySummary;
 }) {
+  const metroLabel = summary.metro ?? "Austin";
   const links: { id: Screen; label: string; n: string | null }[] = [
-    { id: "matches", label: "Matches", n: "4" },
-    { id: "network", label: "Network", n: "47" },
+    {
+      id: "matches",
+      label: "Matches",
+      n: summary.matchCount > 0 ? String(summary.matchCount) : null,
+    },
+    {
+      id: "network",
+      label: "Network",
+      n: summary.total > 0 ? String(summary.total) : null,
+    },
     { id: "join", label: "Join", n: null },
   ];
 
@@ -42,7 +55,7 @@ export function TopNav({
       <div className="nav-right">
         <span className="nav-status">
           <span className="nav-status-dot" />
-          47 vetted
+          {summary.total} vetted
         </span>
         <Button variant="ghost" size="sm" onClick={() => go("matches")}>
           Try demo
@@ -50,7 +63,9 @@ export function TopNav({
         <Button variant="primary" size="sm" onClick={() => go("matches")}>
           <IconArrow size={14} stroke="#0E0F11" /> Propose
         </Button>
-        <span className="avatar">S</span>
+        <span className="avatar" title={metroLabel}>
+          {metroLabel.slice(0, 1).toUpperCase()}
+        </span>
       </div>
     </nav>
   );

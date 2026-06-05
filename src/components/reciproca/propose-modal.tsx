@@ -3,10 +3,12 @@ import { Button, IconClose } from "./primitives";
 
 export function ProposeModal({
   member,
+  offeringDefault,
   onSend,
   onClose,
 }: {
   member: Member;
+  offeringDefault?: string;
   onSend: () => void;
   onClose: () => void;
 }) {
@@ -29,12 +31,12 @@ export function ProposeModal({
           <label className="label">You are offering</label>
           <input
             className="input"
-            defaultValue="60-minute yoga classes, 4x/month"
+            defaultValue={offeringDefault ?? member.trading}
           />
         </div>
         <div style={{ marginTop: 16 }}>
           <label className="label">You are asking for</label>
-          <input className="input" defaultValue={member.trading} />
+          <input className="input" defaultValue={member.looking} />
         </div>
         <div className="disclaimer">
           Barter transactions may be taxable income. Keep records of what you give

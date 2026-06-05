@@ -47,6 +47,7 @@ export const SYNONYM_GROUPS: readonly string[][] = [
   ["accounting", "bookkeeping", "payroll", "tax", "cpa", "finance"],
   ["web", "website", "development", "software", "app", "digital"],
   ["photography", "photo", "video", "videography", "filming"],
+  ["wellness", "yoga", "fitness", "massage", "therapy", "session", "sessions"],
   ["catering", "food", "event", "events", "hospitality", "venue"],
   ["consulting", "advisory", "strategy", "coaching", "training"],
   ["hvac", "plumbing", "electrical", "maintenance", "repair", "facilities"],

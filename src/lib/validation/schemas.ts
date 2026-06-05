@@ -41,6 +41,11 @@ export const swipeProposalSchema = z.object({
   reasonTags: z.array(z.string().max(50)).max(10).optional(),
 });
 
+export const swipeDiscoverySchema = z.object({
+  targetBusinessId: z.string().uuid(),
+  action: z.enum(["interested", "pass", "save"]),
+});
+
 export const acceptProposalSchema = z.object({
   proposalId: z.string().uuid(),
   taxAcknowledged: z.literal(true),

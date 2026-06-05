@@ -16,6 +16,7 @@
     "test:onboarding": "node scripts/test-onboarding-flow.mjs",
     "db:start": "supabase start",
     "db:reset": "supabase db reset",
+    "db:seed": "supabase db reset",
     "db:push": "supabase db push",
     "db:types": "supabase gen types typescript --local > src/lib/db/database.generated.ts"
   },

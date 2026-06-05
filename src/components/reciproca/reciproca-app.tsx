@@ -8,9 +8,11 @@ import { LandingNav } from "./screens/landing-nav";
 import { Matches } from "./screens/matches";
 import { TopNav } from "./screens/top-nav";
 import type { Screen } from "./types";
+import { useDiscoveryStats } from "./use-discovery-stats";
 
 export function ReciprocaApp() {
   const [screen, setScreen] = useState<Screen>("landing");
+  const { summary } = useDiscoveryStats("Austin");
 
   const go = (next: Screen) => {
     setScreen(next);
@@ -19,15 +21,17 @@ export function ReciprocaApp() {
 
   return (
     <div className="app" data-screen-label={screen}>
-      {screen !== "landing" && <TopNav screen={screen} go={go} />}
+      {screen !== "landing" && (
+        <TopNav screen={screen} go={go} summary={summary} />
+      )}
       {screen === "landing" && (
         <>
           <LandingNav go={go} />
-          <Landing go={go} />
+          <Landing go={go} summary={summary} />
         </>
       )}
       {screen === "matches" && <Matches go={go} />}
-      {screen === "network" && <BrowseNetwork go={go} />}
+      {screen === "network" && <BrowseNetwork go={go} summary={summary} />}
       {screen === "join" && <Join go={go} />}
     </div>
   );
