@@ -37,8 +37,10 @@ Supabase stays hosted on [supabase.com](https://supabase.com). Clerk stays on [c
    | Variable | Value |
    |----------|-------|
    | `CLERK_SECRET_KEY` | Clerk secret key |
-   | `SUPABASE_URL` | `https://<project-ref>.supabase.co` |
+   | `SUPABASE_URL` | **Required.** `https://<project-ref>.supabase.co` (same host as Vercel `NEXT_PUBLIC_SUPABASE_URL`) |
    | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role (server only) |
+
+   If deploy logs show `Missing required env vars: SUPABASE_URL`, add `SUPABASE_URL` in Render — copying only Vercel’s `NEXT_PUBLIC_*` vars is not enough unless you also set `SUPABASE_URL` or `NEXT_PUBLIC_SUPABASE_URL` on Render.
    | `ALLOWED_ORIGINS` | `https://<your-vercel-domain>` (optional; BFF calls server-side) |
 
 4. After deploy, copy the service URL (e.g. `https://reciproca-onboarding-api.onrender.com`).
