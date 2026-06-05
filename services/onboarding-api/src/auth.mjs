@@ -1,7 +1,15 @@
 import { verifyToken } from "@clerk/backend";
 
+function getRequestHeader(req, name) {
+  const key = name.toLowerCase();
+  const value = req.headers[key];
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value[0] ?? "";
+  return "";
+}
+
 export async function requireClerkUserId(req, secretKey) {
-  const header = req.headers.get("authorization") ?? "";
+  const header = getRequestHeader(req, "authorization");
   const match = header.match(/^Bearer\s+(.+)$/i);
   if (!match) {
     const error = new Error("Authentication required");
