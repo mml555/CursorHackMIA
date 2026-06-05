@@ -1,0 +1,64 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import {
+  ErrorBox,
+  OnboardingShell,
+} from "@/components/onboarding/ui";
+import { completeOnboarding } from "@/lib/onboarding/browser-client";
+import type { OnboardingStatus } from "@/lib/onboarding/schemas";
+
+export function CompleteView({ status }: { status: OnboardingStatus }) {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const profile = status.profile;
+
+  async function onSubmit() {
+    setLoading(true);
+    setError(null);
+    try {
+      await completeOnboarding();
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to submit");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (status.isComplete) {
+    return (
+      <OnboardingShell step="complete" title="Submitted" description="Your backend has marked onboarding as complete.">
+        <p className="text-sm">Profile for <strong>{profile?.legalName ?? "your company"}</strong> is ready for review.</p>
+      </OnboardingShell>
+    );
+  }
+
+  return (
+    <OnboardingShell step="complete" title="Review" description="Confirm and submit to your backend through the middleware API.">
+      <div className="space-y-4 text-sm">
+        <div><strong>Company:</strong> {profile?.legalName ?? "—"}</div>
+        <div><strong>Industry:</strong> {profile?.industry ?? "—"}</div>
+        <div><strong>Offers:</strong> {status.offers.length}</div>
+        <div><strong>Needs:</strong> {status.needs.length}</div>
+        <div><strong>Consent:</strong> {profile?.scrapeConsent ? "Yes" : "No"}</div>
+        {status.missingFields.length > 0 ? (
+          <p className="text-amber-700 dark:text-amber-300">
+            Missing: {status.missingFields.join(", ")}
+          </p>
+        ) : null}
+        <ErrorBox message={error} />
+        <button
+          type="button"
+          disabled={loading || status.missingFields.length > 0}
+          onClick={onSubmit}
+          className="rounded-full bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
+        >
+          {loading ? "Submitting..." : "Submit for vetting"}
+        </button>
+      </div>
+    </OnboardingShell>
+  );
+}

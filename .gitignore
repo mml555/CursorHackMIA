@@ -272,3 +272,6 @@ package-lock.json.bak
 # .cursor/rules/*.mdc on disk in this workspace. Do not add .cursor/rules to
 # .cursor/gitignore (that would affect indexing, not rule application).
 .cursor/
+
+# clerk configuration (can include secrets)
+/.clerk/

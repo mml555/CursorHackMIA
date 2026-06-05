@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { AuthError } from "@/lib/clerk/auth";
+import { BackendError } from "@/lib/backend/config";
 import { InvalidTransitionError } from "@/lib/trades/state-machine";
 import { TradeError } from "@/lib/trades/errors";
 
@@ -33,6 +34,10 @@ export function handleRouteError(error: unknown) {
 
   if (error instanceof ZodError) {
     return apiError("VALIDATION_ERROR", "Invalid request", 422, error.flatten());
+  }
+
+  if (error instanceof BackendError) {
+    return apiError(error.code, error.message, error.status, error.details);
   }
 
   if (error instanceof InvalidTransitionError) {
