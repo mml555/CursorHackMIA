@@ -264,6 +264,9 @@ cypress/screenshots/
 *.tgz
 *.tar.gz
 vendor/
+# App source lives under src/components/vendor/ (not Go/Composer vendor deps)
+!src/components/vendor/
+!src/components/vendor/**
 composer.lock.bak
 package-lock.json.bak
 
