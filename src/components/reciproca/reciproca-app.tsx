@@ -6,6 +6,7 @@ import { BusinessProfileScreen } from "./screens/business-profile";
 import { Join } from "./screens/join";
 import { Landing } from "./screens/landing";
 import { LandingNav } from "./screens/landing-nav";
+import { MatchPointsScreen } from "./screens/match-points";
 import { Matches } from "./screens/matches";
 import { TopNav } from "./screens/top-nav";
 import type { Navigate, Screen } from "./types";
@@ -42,6 +43,7 @@ export function ReciprocaApp() {
         </>
       )}
       {screen === "matches" && <Matches go={go} />}
+      {screen === "match-points" && <MatchPointsScreen go={go} />}
       {screen === "network" && <BrowseNetwork go={go} summary={summary} />}
       {screen === "join" && <Join go={go} />}
       {screen === "profile" && profileBusinessId && (

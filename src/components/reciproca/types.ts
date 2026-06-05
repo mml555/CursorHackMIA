@@ -3,7 +3,13 @@ import type {
   DiscoveryMember,
 } from "@/lib/discovery/types";
 
-export type Screen = "landing" | "matches" | "network" | "join" | "profile";
+export type Screen =
+  | "landing"
+  | "matches"
+  | "network"
+  | "join"
+  | "profile"
+  | "match-points";
 
 export type Member = DiscoveryMember;
 export type Match = DiscoveryMatch;

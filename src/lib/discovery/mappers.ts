@@ -4,6 +4,7 @@ import type {
   PartialMatch,
 } from "@/lib/matching/types";
 import { getBusinessMediaPublicUrl } from "@/lib/storage/business-media";
+import { rawScoreToMatchPoints } from "@/lib/discovery/match-points";
 import type {
   BusinessProfile,
   DiscoveryCard,
@@ -127,9 +128,14 @@ export function directMatchToDiscoveryMatch(
         trades: 0,
       };
 
+  const fit = rawScoreToMatchPoints(match.score);
+
   return {
     member,
-    pct: Math.round(match.score * 100),
+    points: fit.points,
+    tier: fit.tier,
+    tierLabel: fit.tierLabel,
+    rank: index + 1,
     top: index === 0,
     reason: match.summary,
   };
@@ -167,9 +173,14 @@ export function partialMatchToDiscoveryMatch(
         trades: 0,
       };
 
+  const fit = rawScoreToMatchPoints(match.score);
+
   return {
     member,
-    pct: Math.round(match.score * 100),
+    points: fit.points,
+    tier: fit.tier,
+    tierLabel: fit.tierLabel,
+    rank: index + 1,
     top: index === 0,
     reason: match.summary,
   };
@@ -220,9 +231,10 @@ export function buildRecommendations(
     return true;
   });
 
-  if (matches.length > 0) {
-    matches[0].top = true;
-  }
+  matches.forEach((match, index) => {
+    match.rank = index + 1;
+    match.top = index === 0;
+  });
 
   return {
     focalBusinessId,

@@ -10,7 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:matching": "tsx --test src/lib/matching/matching.test.ts src/lib/matching/matching-quality.test.ts src/lib/matching/score-quantity.test.ts src/lib/matching/embeddings/cosine.test.ts",
+    "test:matching": "tsx --test src/lib/matching/matching.test.ts src/lib/matching/matching-quality.test.ts src/lib/matching/score-quantity.test.ts src/lib/matching/embeddings/cosine.test.ts src/lib/discovery/match-points.test.ts",
     "test:trades": "tsx --test src/lib/trades/trades.test.ts",
     "mock:backend": "node scripts/mock-backend.mjs",
     "test:onboarding": "node scripts/test-onboarding-flow.mjs",

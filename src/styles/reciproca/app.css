@@ -92,9 +92,17 @@ a { color: inherit; text-decoration: none; }
 .biz-stars svg { width: 15px; height: 15px; }
 
 /* ---------- Match ring ---------- */
+.match-ring-block { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: none; }
 .ring-wrap { position: relative; width: 64px; height: 64px; flex: none; }
-.ring-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-mono); font-size: 16px; font-weight: 500; color: var(--amber); }
+.ring-num { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; font-family: var(--font-mono); color: var(--amber); line-height: 1; }
+.ring-points { font-size: 17px; font-weight: 600; }
+.ring-unit { font-size: 9px; letter-spacing: .08em; text-transform: uppercase; opacity: .85; margin-top: 2px; }
+.ring-tier { font-size: 10px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.ring-tier-excellent { color: var(--amber); }
+.ring-tier-strong { color: #7dd3fc; }
+.ring-tier-good { color: var(--teal); }
+.ring-tier-fair { color: var(--text-3); }
 .ring-glow { filter: drop-shadow(0 0 16px rgba(240,165,0,.35)); }
 .ring-arc { stroke-dashoffset: var(--off); }
 @media (prefers-reduced-motion: no-preference) {
@@ -235,6 +243,35 @@ a { color: inherit; text-decoration: none; }
 .match-card { display: grid; grid-template-columns: auto 1fr; gap: 18px; }
 .match-main { min-width: 0; }
 .match-head { display: flex; align-items: flex-start; gap: 12px; }
+.match-rank-pill { display: inline-flex; align-items: center; margin-left: 8px; padding: 2px 8px;
+  border-radius: var(--r-pill); background: rgba(255,255,255,.04); border: 1px solid var(--hairline);
+  font-family: var(--font-mono); font-size: 11px; color: var(--text-2); }
+.progress-pill-link { cursor: pointer; border: none; background: rgba(45,212,170,.08);
+  transition: background var(--dur), border-color var(--dur); }
+.progress-pill-link:hover { background: rgba(45,212,170,.14); }
+
+/* ---------- Match points explainer ---------- */
+.points-intro p { margin: 0; color: var(--text-2); line-height: 1.7; }
+.points-section { margin-top: 32px; }
+.points-heading { font-size: 18px; font-weight: 600; margin: 0 0 16px; color: var(--text-1); }
+.points-tier-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.points-tier-card { padding: 18px; }
+.points-tier-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.points-tier-label { font-size: 15px; font-weight: 600; color: var(--text-1); }
+.points-tier-range { font-family: var(--font-mono); font-size: 12px; color: var(--amber); }
+.tier-excellent { border-color: rgba(240,165,0,.35); }
+.tier-strong { border-color: rgba(125,211,252,.25); }
+.tier-good { border-color: rgba(45,212,170,.25); }
+.points-component-list { display: flex; flex-direction: column; gap: 14px; }
+.points-component-row { padding: 16px 18px; border: 1px solid var(--hairline); border-radius: var(--r-card);
+  background: var(--surface-raised); }
+.points-component-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.points-component-label { font-weight: 600; color: var(--text-1); }
+.points-component-weight { font-family: var(--font-mono); font-size: 12px; color: var(--teal); }
+.points-ranking-card { padding: 20px 22px; }
+.points-ranking-list { margin: 0; padding-left: 20px; color: var(--text-2); line-height: 1.75; }
+.points-ranking-list li + li { margin-top: 10px; }
+.points-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
 
 /* ---------- Modal ---------- */
 .scrim { position: fixed; inset: 0; background: rgba(8,9,10,.72); backdrop-filter: blur(3px);
@@ -316,7 +353,7 @@ a { color: inherit; text-decoration: none; }
   .seg { margin-left: 0; flex: 1; min-width: 0; }
 }
 @media (max-width: 640px) {
-  .grid, .value-row, .field-grid { grid-template-columns: 1fr; }
+  .grid, .value-row, .field-grid, .points-tier-grid { grid-template-columns: 1fr; }
   .summary { grid-template-columns: 1fr; }
   .summary .cell { border-right: none; border-bottom: 1px solid var(--hairline); }
   .summary .cell:last-child { border-bottom: none; }

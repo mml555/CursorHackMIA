@@ -73,9 +73,14 @@ export type DiscoveryMember = {
   trades: number;
 };
 
+export type MatchFitTier = "excellent" | "strong" | "good" | "fair";
+
 export type DiscoveryMatch = {
   member: DiscoveryMember;
-  pct: number;
+  points: number;
+  tier: MatchFitTier;
+  tierLabel: string;
+  rank: number;
   top?: boolean;
   reason: string;
 };

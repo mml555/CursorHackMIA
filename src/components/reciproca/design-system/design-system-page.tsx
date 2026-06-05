@@ -252,8 +252,8 @@ export function DesignSystemPage() {
 
         <Section title="Match ring">
           <div style={{ display: "flex", gap: 40, alignItems: "center" }}>
-            <MatchRing pct={78} />
-            <MatchRing pct={94} />
+            <MatchRing points={72} tier="strong" tierLabel="Strong" />
+            <MatchRing points={91} tier="excellent" tierLabel="Excellent" />
           </div>
         </Section>
 

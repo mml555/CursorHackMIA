@@ -102,7 +102,11 @@ export function Matches({ go }: { go: Navigate }) {
           <PageHeader
             title="Your matches"
             badge={
-              <span className="progress-pill">
+              <button
+                type="button"
+                className="progress-pill progress-pill-link"
+                onClick={() => go("match-points")}
+              >
                 <span
                   className="reason-dot"
                   style={{
@@ -110,8 +114,8 @@ export function Matches({ go }: { go: Navigate }) {
                     boxShadow: "0 0 8px var(--teal)",
                   }}
                 />
-                AI-ranked by fit
-              </span>
+                Match Fit Points · How it works
+              </button>
             }
           />
 

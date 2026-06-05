@@ -23,13 +23,19 @@ export function MatchCard({
 
   return (
     <div className={"card match-card" + (match.top ? " match-top" : "")}>
-      <MatchRing pct={match.pct} delay={index * 220} />
+      <MatchRing
+        points={match.points}
+        tier={match.tier}
+        tierLabel={match.tierLabel}
+        delay={index * 220}
+      />
       <div className="match-main">
         <div className="match-head">
           <Chip name={m.name} />
           <div style={{ flex: 1 }}>
             <div className="biz-name">
               {m.name} <Vetted />
+              <span className="match-rank-pill">#{match.rank}</span>
               {match.top && (
                 <span className="top-pill">
                   <IconStar filled size={11} /> Top Match
