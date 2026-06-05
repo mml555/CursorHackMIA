@@ -113,6 +113,15 @@ export async function getDiscoveryStats(metro?: string): Promise<DiscoveryStats>
   };
 }
 
+export async function getDiscoveryNetwork(options?: {
+  metro?: string;
+  industry?: string;
+  query?: string;
+}): Promise<{ members: DiscoveryMember[] }> {
+  const cards = await listDiscoveryCards(options);
+  return { members: cardsToMembers(cards) };
+}
+
 export async function getBusinessIdBySlug(slug: string): Promise<string | null> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
