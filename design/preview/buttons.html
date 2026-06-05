@@ -1,0 +1,19 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0}
+  .wrap{background:var(--ink);padding:26px 28px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .btn{height:44px;border-radius:10px;padding:0 22px;font-family:var(--font-ui);font-size:15px;font-weight:600;display:inline-flex;align-items:center;border:1px solid transparent;cursor:pointer}
+  .primary{background:var(--amber);color:#0E0F11;box-shadow:0 0 20px rgba(240,165,0,.25)}
+  .primary.hover{background:var(--amber-hover);box-shadow:0 0 24px rgba(240,165,0,.4)}
+  .secondary{background:transparent;color:var(--text-1);border-color:var(--hairline)}
+  .secondary.hover{border-color:var(--amber)}
+  .lbl{font-family:var(--font-mono);font-size:10px;color:var(--text-3);display:block;margin-bottom:8px}
+  .col{display:flex;flex-direction:column}
+</style></head>
+<body><div class="wrap">
+  <div class="col"><span class="lbl">PRIMARY</span><button class="btn primary">Apply to join</button></div>
+  <div class="col"><span class="lbl">PRIMARY · HOVER</span><button class="btn primary hover">Apply to join</button></div>
+  <div class="col"><span class="lbl">SECONDARY</span><button class="btn secondary">See how it works</button></div>
+  <div class="col"><span class="lbl">SECONDARY · HOVER</span><button class="btn secondary hover">See how it works</button></div>
+</div></body></html>

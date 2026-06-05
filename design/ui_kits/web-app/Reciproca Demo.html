@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Reciproca — Complete Demo</title>
+<link rel="stylesheet" href="tokens.css"/>
+<style>
+/* ── Additional styles for full demo ── */
+.ring-arc{stroke-dashoffset:var(--off)}
+@media(prefers-reduced-motion:no-preference){
+  .ring-arc{animation:ringDraw 900ms var(--ease) both}
+  @keyframes ringDraw{from{stroke-dashoffset:var(--c)}to{stroke-dashoffset:var(--off)}}
+}
+@keyframes think{0%,100%{opacity:.2}50%{opacity:.9}}
+@keyframes blink{50%{opacity:0}}
+@keyframes pulseRing{to{transform:scale(1.18);opacity:0}}
+*{box-sizing:border-box}
+html,body,#root{margin:0;min-height:100vh}
+body{background:var(--ink);color:var(--text-1);font-family:var(--font-ui);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+button{font-family:var(--font-ui);cursor:pointer}
+input,textarea,select{font-family:var(--font-ui)}
+/* layout */
+.app{display:flex;flex-direction:column;min-height:100vh}
+.screen{flex:1}
+.container{max-width:1120px;margin:0 auto;padding:0 28px}
+.narrow{max-width:680px;margin:0 auto;padding:0 28px}
+/* nav */
+.nav{height:64px;background:var(--ink);border-bottom:1px solid var(--hairline);
+  display:flex;align-items:center;gap:14px;padding:0 20px;position:sticky;top:0;z-index:40;flex:none}
+.seg{display:flex;background:var(--obsidian);border:1px solid var(--hairline);border-radius:11px;padding:3px;gap:2px}
+.seg a{font-size:13px;color:var(--text-2);padding:7px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none}
+.seg a .n{font-family:var(--font-mono);font-size:10px;color:var(--text-3)}
+.seg a.on{background:var(--amber);color:#0E0F11;font-weight:600}
+.seg a.on .n{color:rgba(14,15,17,.5)}
+/* cards */
+.card{background:var(--obsidian);border:1px solid var(--hairline);border-radius:14px;padding:24px;
+  box-shadow:0 1px 3px rgba(0,0,0,.4);transition:border-color .2s,transform .2s,box-shadow .2s}
+.card:hover{border-color:var(--amber);transform:translateY(-2px)}
+.match-card{background:var(--obsidian);border:1px solid var(--hairline);border-radius:14px;padding:24px;
+  box-shadow:0 1px 3px rgba(0,0,0,.4);display:grid;grid-template-columns:auto 1fr;gap:20px}
+.match-card.top{border-color:rgba(240,165,0,.45);box-shadow:0 0 28px rgba(240,165,0,.1)}
+/* hero */
+.hero{padding:88px 0 60px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;top:-20%;left:50%;transform:translateX(-50%);
+  width:900px;height:600px;background:radial-gradient(ellipse at center,rgba(240,165,0,.055),transparent 60%);pointer-events:none}
+/* form */
+.label{display:block;font-size:13px;font-weight:500;color:var(--text-2);margin-bottom:8px}
+.inp{width:100%;background:var(--surface-raised);border:1px solid var(--hairline);border-radius:10px;
+  padding:11px 14px;color:var(--text-1);font-size:15px;transition:border-color .18s,box-shadow .18s}
+.inp:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px rgba(240,165,0,.18)}
+.inp.err{border-color:#EF4444}
+.inp::placeholder{color:var(--text-3)}
+/* grid */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:880px){.grid3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.grid3{grid-template-columns:1fr}}
+/* modal */
+.scrim{position:fixed;inset:0;background:rgba(8,9,10,.75);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal{background:var(--obsidian);border:1px solid var(--hairline);border-radius:20px;
+  padding:28px;width:100%;max-width:500px;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+/* toast */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+  background:var(--surface-raised);border:1px solid var(--hairline);border-radius:10px;
+  padding:12px 18px;font-size:14px;display:flex;align-items:center;gap:10px;
+  box-shadow:0 12px 30px rgba(0,0,0,.5);z-index:200;white-space:nowrap}
+/* pill */
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill.amber{background:rgba(240,165,0,.12);color:var(--amber);border:1px solid var(--amber)}
+.pill.green{background:#14532D;color:#22C55E}
+.pill.neutral{background:var(--surface-raised);border:1px solid var(--hairline);color:var(--text-2)}
+/* tags */
+.tag{display:inline-block;background:var(--surface-raised);color:var(--text-2);border-radius:6px;padding:3px 10px;font-size:12px}
+/* sumbar */
+.sumbar{display:grid;grid-template-columns:1fr 1fr auto;background:var(--surface-raised);
+  border:1px solid var(--hairline);border-radius:14px;overflow:hidden;position:relative}
+.sumbar::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--amber),#D49200)}
+.sumbar .c{padding:14px 20px;border-right:1px solid var(--hairline)}
+.sumbar .c:last-child{border-right:none;display:flex;align-items:center;padding:14px 16px}
+.sumbar .k{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3)}
+.sumbar .v{font-size:16px;font-weight:500;margin-top:5px}
+/* filter pills */
+.fpill{background:transparent;color:var(--text-2);border:1px solid var(--hairline);border-radius:999px;
+  padding:7px 15px;font-size:13px;cursor:pointer;transition:all .18s}
+.fpill:hover{color:var(--text-1)}
+.fpill.on{background:var(--amber);color:#0E0F11;border-color:var(--amber)}
+/* section heading */
+.section-hd{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+// ── Icons (Lucide-style) ──
+const I = ({d,size=18,stroke="currentColor",sw=1.7,children}) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={stroke}
+    strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" style={{flex:'none'}}>
+    {d?<path d={d}/>:children}
+  </svg>
+);
+const ICheck = p=><I {...p} d="M20 6 9 17l-5-5" sw={3}/>;
+const ISearch = p=><I {...p}><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></I>;
+const IClose = p=><I {...p} d="M18 6 6 18M6 6l12 12"/>;
+const IShield = p=><I {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></I>;
+const INoMoney = p=><I {...p}><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6 18.4 18.4"/></I>;
+const ISparkle = p=><I {...p} d="M12 3v3M12 18v3M3 12h3M18 12h3M6.3 6.3l1.8 1.8M15.9 15.9l1.8 1.8M18.4 5.6l-1.8 1.8M8.1 15.9l-1.8 1.8"/>;
+const IArrow = p=><I {...p} d="M5 12h14M13 6l6 6-6 6"/>;
+
+const Mark = ({size=28})=><img src="assets/reciproca-mark.png" alt="" width={size} height={size} style={{display:'block',objectFit:'contain'}}/>;
+
+const Btn = ({v='primary',sz,block,children,...r}) => {
+  const hs = {primary:{background:'var(--amber)',color:'#0E0F11',boxShadow:'0 0 20px rgba(240,165,0,.25)',borderColor:'transparent'},
+    secondary:{background:'transparent',color:'var(--text-1)',borderColor:'var(--hairline)'},
+    ghost:{background:'transparent',color:'var(--amber)',borderColor:'rgba(240,165,0,.4)'}};
+  return <button style={{height:sz==='sm'?38:44,borderRadius:10,fontFamily:'var(--font-ui)',fontWeight:600,
+    fontSize:sz==='sm'?13:15,display:'inline-flex',alignItems:'center',justifyContent:'center',gap:7,
+    border:'1px solid transparent',cursor:'pointer',transition:'all .18s',whiteSpace:'nowrap',
+    padding:sz==='sm'?'0 13px':'0 20px',...(block?{width:'100%'}:{}),...hs[v]}} {...r}>{children}</button>;
+};
+
+const Vetted = ()=>(
+  <span style={{display:'inline-flex',alignItems:'center',gap:5,background:'#14532D',color:'#22C55E',
+    borderRadius:999,padding:'3px 10px 3px 8px',fontSize:11,fontWeight:600,whiteSpace:'nowrap'}}>
+    <ICheck size={11} stroke="#22C55E"/>Vetted
+  </span>
+);
+
+const StarRow = ({val,size=14})=>(
+  <span style={{display:'inline-flex',gap:3}}>
+    {[1,2,3,4,5].map(i=>(
+      <svg key={i} width={size} height={size} viewBox="0 0 24 24" fill={i<=Math.round(val)?'#F0A500':'#2A2D35'}>
+        <path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/>
+      </svg>))}
+  </span>
+);
+
+const StarPicker = ({val,onChange})=>{
+  const [hov,setHov]=useState(0);
+  return <div style={{display:'flex',gap:6}}>{[1,2,3,4,5].map(i=>(
+    <svg key={i} width="28" height="28" viewBox="0 0 24 24" fill={i<=(hov||val)?'#F0A500':'#2A2D35'}
+      style={{cursor:'pointer',transition:'fill .12s',flex:'none'}}
+      onMouseEnter={()=>setHov(i)} onMouseLeave={()=>setHov(0)} onClick={()=>onChange(i)}>
+      <path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/>
+    </svg>))}</div>;
+};
+
+const Chip = ({name,size=44})=>(
+  <span style={{width:size,height:size,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',
+    fontWeight:700,color:'var(--amber)',fontSize:size*.38,flex:'none',background:'linear-gradient(135deg,#2a2d35,#1e2026)'}}>
+    {name[0]}
+  </span>
+);
+
+const MatchRing = ({pct,size=64,delay=0})=>{
+  const r=28,C=2*Math.PI*r,off=C*(1-pct/100);
+  return <div style={{position:'relative',width:size,height:size,flex:'none',filter:pct>=85?'drop-shadow(0 0 16px rgba(240,165,0,.35))':'none'}}>
+    <svg width={size} height={size} viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r={r} fill="none" stroke="#2A2D35" strokeWidth="6"/>
+      <circle cx="32" cy="32" r={r} fill="none" stroke="#F0A500" strokeWidth="6" strokeLinecap="round"
+        strokeDasharray={C} transform="rotate(-90 32 32)"
+        className="ring-arc" style={{strokeDashoffset:off,'--c':C,'--off':off,animationDelay:delay+'ms'}}/>
+    </svg>
+    <span style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',
+      fontFamily:'var(--font-mono)',fontSize:size*.25,fontWeight:500,color:'var(--amber)'}}>{pct}%</span>
+  </div>;
+};
+
+const ThinkDots = ()=><span style={{display:'inline-flex',gap:3,marginLeft:4}}>
+  {[0,.2,.4].map((d,i)=><span key={i} style={{width:4,height:4,borderRadius:'50%',background:'var(--teal)',
+    animation:`think 1.4s ${d}s ease-in-out infinite`,display:'inline-block'}}/>)}
+</span>;
+
+const ReasonBox = ({text,typeIt=false,startDelay=400})=>{
+  const [out,setOut]=useState(typeIt?'':text);
+  const [done,setDone]=useState(!typeIt);
+  useEffect(()=>{
+    if(!typeIt)return;
+    let i=0,iv;
+    const t=setTimeout(()=>{iv=setInterval(()=>{if(i<text.length){setOut(text.slice(0,i+=2))}else{clearInterval(iv);setDone(true)}},12)},startDelay);
+    return()=>{clearTimeout(t);clearInterval(iv)};
+  },[text]);
+  return <div style={{position:'relative',background:'rgba(45,212,170,.04)',borderRadius:12,padding:'13px 17px 13px 19px',marginTop:16}}>
+    <span style={{position:'absolute',left:0,top:13,bottom:13,width:2,borderRadius:2,background:'linear-gradient(180deg,#2DD4AA,rgba(45,212,170,.12))'}}/>
+    <div style={{fontFamily:'var(--font-mono)',color:'var(--teal)',fontSize:11,letterSpacing:'.06em',display:'flex',alignItems:'center',gap:7,marginBottom:7,whiteSpace:'nowrap'}}>
+      <span style={{width:6,height:6,borderRadius:'50%',background:'var(--teal)',boxShadow:'0 0 6px var(--teal)',flex:'none'}}/>
+      why this match{!done&&<ThinkDots/>}
+    </div>
+    <div style={{fontFamily:'var(--font-mono)',color:'var(--text-1)',fontSize:13,lineHeight:1.7}}>
+      {out}{!done&&<span style={{display:'inline-block',width:7,height:13,background:'var(--amber)',verticalAlign:'-2px',marginLeft:2,animation:'blink 1s steps(1) infinite'}}/>}
+    </div>
+  </div>;
+};
+
+// ── Data ──
+const MEMBERS=[
+  {id:'sunrise',name:'Sunrise Yoga Studio',industry:'Wellness',trading:'60-min yoga classes, 4x/mo',looking:'Brand photography',score:4.9,trades:24},
+  {id:'luminary',name:'Luminary Studio',industry:'Photography',trading:'Brand & product photography',looking:'Team wellness sessions',score:4.8,trades:31},
+  {id:'verde',name:'Verde Social',industry:'Social agency',trading:'Social management + reach',looking:'Studio video content',score:4.7,trades:19},
+  {id:'hill',name:'Hill Country Massage',industry:'Wellness',trading:'Massage therapy hours',looking:'Monthly bookkeeping',score:4.6,trades:12},
+  {id:'lonestar',name:'Lone Star Bookkeeping',industry:'Finance',trading:'Monthly bookkeeping',looking:'Marketing',score:4.9,trades:28},
+  {id:'atx',name:'ATX Web Co',industry:'Web design',trading:'Web design & build',looking:'Office wellness program',score:4.5,trades:9},
+];
+const MATCHES=[
+  {member:MEMBERS[1],pct:94,top:true,reason:'Luminary Studio offers brand photography for small businesses and needs weekly wellness sessions for a team of 6. Your class format and their session format match in value and frequency.'},
+  {member:MEMBERS[2],pct:81,reason:'Verde Social manages social for local studios and wants recurring on-site classes for their team. A 4x/month cadence covers their wellness budget.'},
+  {member:MEMBERS[5],pct:76,reason:'ATX Web Co is building an office wellness program and offers web design in exchange. Session volume needs alignment before proposing.'},
+  {member:MEMBERS[3],pct:68,reason:'Hill Country Massage trades therapy hours and could co-bundle a wellness package, though the direct value overlap is partial.'},
+];
+
+// ── SummaryBar ──
+const SumBar = ({offering,looking,status})=>(
+  <div className="sumbar" style={{marginBottom:24}}>
+    <div className="c"><div className="k">Offering</div><div className="v">{offering}</div></div>
+    <div className="c"><div className="k">Looking for</div><div className="v">{looking}</div></div>
+    <div className="c">{status||<Vetted/>}</div>
+  </div>
+);
+
+// ── TopNav ──
+const TopNav = ({screen,go})=>{
+  const links=[{id:'network',label:'Network',n:'47'},{id:'matches',label:'Matches',n:'4'},{id:'join',label:'Join',n:null}];
+  return <nav className="nav">
+    <div style={{display:'flex',alignItems:'center',gap:9,cursor:'pointer'}} onClick={()=>go('landing')}>
+      <Mark size={28}/><span style={{fontWeight:700,fontSize:17,letterSpacing:'-0.02em'}}>Reciproca</span>
+      <span style={{fontFamily:'var(--font-mono)',fontSize:8,letterSpacing:'.14em',color:'var(--text-3)',border:'1px solid var(--hairline)',borderRadius:4,padding:'2px 5px'}}>BETA</span>
+    </div>
+    <div className="seg" style={{marginLeft:8}}>
+      {links.map(l=><a key={l.id} className={screen===l.id?'on':''} onClick={()=>go(l.id)}>
+        {l.label}{l.n&&<span className="n">{l.n}</span>}
+      </a>)}
+    </div>
+    <div style={{marginLeft:'auto',display:'flex',alignItems:'center',gap:10}}>
+      <span style={{display:'flex',alignItems:'center',gap:7,fontFamily:'var(--font-mono)',fontSize:11,
+        color:'var(--text-2)',border:'1px solid var(--hairline)',borderRadius:999,padding:'6px 12px',whiteSpace:'nowrap'}}>
+        <span style={{width:6,height:6,borderRadius:'50%',background:'var(--amber)'}}/>47 vetted
+      </span>
+      <Btn v="ghost" sz="sm" onClick={()=>go('matches')}>Try demo</Btn>
+      <Btn sz="sm" onClick={()=>go('matches')}><IArrow size={13} stroke="#0E0F11"/>Propose</Btn>
+      <span style={{width:34,height:34,borderRadius:'50%',background:'linear-gradient(135deg,#2a2d35,#1e2026)',
+        display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:700,color:'var(--amber)',
+        border:'1px solid var(--hairline)'}}>S</span>
+    </div>
+  </nav>;
+};
+
+// ── Landing ──
+const Landing = ({go})=>{
+  const vals=[
+    {ico:<IShield size={18}/>,k:'Vetted before you meet',d:'Every member passes a license check, trade reference, and onboarding review.'},
+    {ico:<ISparkle size={18}/>,k:'AI-matched by fit',d:'Semantic matching finds your counterpart, including multi-party trade cycles no pair could clear alone.'},
+    {ico:<INoMoney size={18}/>,k:'No platform currency',d:'Trade services directly. No trade dollars, no points, no bank in the middle.'},
+  ];
+  return <div className="screen">
+    <section className="hero">
+      <div className="container">
+        <div style={{maxWidth:780}}>
+          <p style={{color:'var(--text-2)',fontSize:14,marginBottom:20}}>Most service businesses have skills to spare and budgets they would rather protect.</p>
+          <span style={{display:'inline-flex',alignItems:'center',gap:7,border:'1px solid var(--hairline)',borderRadius:999,padding:'6px 13px',fontSize:13,color:'var(--text-2)',marginBottom:24}}>
+            <span style={{width:6,height:6,borderRadius:'50%',background:'var(--amber)'}}/>
+            Vetted B2B trade network · Austin, TX
+          </span>
+          <h1 style={{fontSize:58,fontWeight:300,lineHeight:1.04,letterSpacing:'-0.03em',margin:'0 0 20px'}}>
+            Trade the services you <b style={{fontWeight:600}}>have</b> for the ones you <b style={{fontWeight:600}}>need</b>.
+          </h1>
+          <p style={{fontSize:19,color:'var(--text-2)',lineHeight:1.6,maxWidth:600,margin:'0 0 32px'}}>Reciproca is a vetted B2B network where businesses trade services directly. AI matching finds your counterpart. No trade dollars, no platform currency, no bank.</p>
+          <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+            <Btn onClick={()=>go('join')}>Apply to join</Btn>
+            <Btn v="secondary" onClick={()=>go('matches')}>See how it works</Btn>
+          </div>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:22,marginTop:64}}>
+          {vals.map((v,i)=><div key={i} style={{display:'flex',flexDirection:'column',gap:10}}>
+            <span style={{width:36,height:36,borderRadius:9,background:'var(--surface-raised)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--amber)'}}>{v.ico}</span>
+            <span style={{fontSize:16,fontWeight:600}}>{v.k}</span>
+            <span style={{fontSize:14,color:'var(--text-2)',lineHeight:1.55}}>{v.d}</span>
+          </div>)}
+        </div>
+        <div style={{marginTop:72,paddingTop:32,borderTop:'1px solid var(--hairline)'}}>
+          <div style={{fontSize:11,letterSpacing:'.08em',textTransform:'uppercase',color:'var(--text-3)',marginBottom:18}}>47 vetted businesses in Austin</div>
+          <div style={{display:'flex',gap:28,flexWrap:'wrap',alignItems:'center'}}>
+            {MEMBERS.map(m=><span key={m.id} style={{display:'flex',alignItems:'center',gap:9,color:'var(--text-2)',fontSize:14,fontWeight:500}}>
+              <Chip name={m.name} size={26}/>{m.name}
+            </span>)}
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>;
+};
+
+// ── BusinessCard ──
+const BizCard = ({m,onPropose})=>(
+  <div className="card" style={{cursor:'pointer'}} onClick={()=>onPropose(m)}>
+    <div style={{display:'flex',alignItems:'center',gap:12}}>
+      <Chip name={m.name}/>
+      <div><div style={{fontSize:18,fontWeight:600,display:'flex',alignItems:'center',gap:7,flexWrap:'wrap'}}>{m.name} <Vetted/></div>
+        <span className="tag" style={{marginTop:6,display:'inline-block'}}>{m.industry}</span></div>
+    </div>
+    <div style={{fontSize:14,marginTop:10}}><span style={{color:'var(--text-3)'}}>Trading</span> <span>{m.trading}</span></div>
+    <div style={{fontSize:14,marginTop:8}}><span style={{color:'var(--text-3)'}}>Looking for</span> <span>{m.looking}</span></div>
+    <div style={{marginTop:14,paddingTop:14,borderTop:'1px solid var(--hairline)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+      <span style={{fontFamily:'var(--font-mono)',color:'var(--amber)',fontSize:13}}>Score {m.score.toFixed(1)} · {m.trades} trades</span>
+      <StarRow val={m.score}/>
+    </div>
+  </div>
+);
+
+// ── Browse Network ──
+const BrowseNetwork = ({go,onPropose})=>{
+  const verts=['All','Wellness','Photography','Social agency','Finance','Web design'];
+  const [filt,setFilt]=useState('All');
+  const [q,setQ]=useState('');
+  const list=MEMBERS.filter(m=>(filt==='All'||m.industry===filt)&&(!q||m.name.toLowerCase().includes(q.toLowerCase())||m.trading.toLowerCase().includes(q.toLowerCase())));
+  return <div className="screen" style={{padding:'36px 0 60px'}}>
+    <div className="container">
+      <div className="section-hd">
+        <div><h1 style={{margin:0,fontSize:38,fontWeight:600,letterSpacing:'-0.01em'}}>Member Network</h1>
+          <p style={{margin:'8px 0 0',color:'var(--text-2)'}}>47 vetted businesses in Austin</p></div>
+        <Btn onClick={()=>go('join')}>List your business</Btn>
+      </div>
+      <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:28,alignItems:'center'}}>
+        <div style={{display:'flex',alignItems:'center',gap:8,background:'var(--surface-raised)',border:'1px solid var(--hairline)',borderRadius:10,padding:'0 13px',height:40,minWidth:220}}>
+          <ISearch size={15} stroke="var(--text-3)"/>
+          <input className="inp" style={{border:'none',background:'none',boxShadow:'none',padding:0,height:'100%',flex:1,fontSize:14}} placeholder="Search members or services" value={q} onChange={e=>setQ(e.target.value)}/>
+        </div>
+        <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+          {verts.map(v=><button key={v} className={'fpill'+(filt===v?' on':'')} onClick={()=>setFilt(v)}>{v}</button>)}
+        </div>
+      </div>
+      {list.length===0
+        ? <div style={{textAlign:'center',padding:'60px 0',color:'var(--text-2)'}}>No businesses match those filters yet. Try expanding your service category or location.</div>
+        : <div className="grid3">{list.map(m=><BizCard key={m.id} m={m} onPropose={onPropose}/>)}</div>}
+    </div>
+  </div>;
+};
+
+// ── Join ──
+const Join = ({go})=>{
+  const [step,setStep]=useState(1);
+  const [svc,setSvc]=useState('');
+  const [tried,setTried]=useState(false);
+  const err=tried&&!svc;
+  return <div className="screen" style={{padding:'40px 0 64px'}}>
+    <div className="narrow">
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+        <h1 style={{margin:0,fontSize:34,fontWeight:600,letterSpacing:'-0.01em'}}>Apply to join</h1>
+        <span style={{display:'inline-flex',alignItems:'center',gap:8,fontFamily:'var(--font-mono)',fontSize:11,
+          color:'var(--text-2)',background:'var(--surface-raised)',border:'1px solid var(--hairline)',borderRadius:999,padding:'5px 12px'}}>
+          <span style={{display:'inline-flex',gap:5}}>{[1,2,3].map(i=><span key={i} style={{width:7,height:7,borderRadius:'50%',background:i<=step?'var(--amber)':'var(--hairline)'}}/>)}</span>
+          Step {step} of 3
+        </span>
+      </div>
+      <p style={{color:'var(--text-2)',marginBottom:28,marginTop:4}}>We review your profile within 48 hours. Vetting includes a license check, a trade reference, and an onboarding review.</p>
+      <div className="card" style={{padding:28}}>
+        <div onFocus={()=>setStep(1)}>
+          <h3 style={{margin:'0 0 18px',fontSize:18}}>Company</h3>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+            <div><label className="label">Business name</label><input className="inp" defaultValue="Sunrise Yoga Studio LLC" placeholder="Business name"/></div>
+            <div><label className="label">Industry</label><input className="inp" defaultValue="Wellness" placeholder="Industry"/></div>
+          </div>
+          <div style={{marginTop:16}}><label className="label">City</label><input className="inp" placeholder="Austin, TX" defaultValue="Austin, TX"/></div>
+        </div>
+        <div style={{borderTop:'1px solid var(--hairline)',paddingTop:24,marginTop:24}} onFocus={()=>setStep(2)}>
+          <h3 style={{margin:'0 0 18px',fontSize:18}}>Your contact information</h3>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+            <div><label className="label">Business email</label><input className="inp" placeholder="maya@sunriseyoga.co"/></div>
+            <div><label className="label">Phone</label><input className="inp" placeholder="(512) 555-0100"/></div>
+          </div>
+        </div>
+        <div style={{borderTop:'1px solid var(--hairline)',paddingTop:24,marginTop:24}} onFocus={()=>setStep(3)}>
+          <h3 style={{margin:'0 0 18px',fontSize:18}}>What you trade</h3>
+          <div>
+            <label className="label">Services you will trade</label>
+            <textarea className={'inp'+(err?' err':'')} style={{minHeight:76,resize:'vertical',lineHeight:1.5}}
+              placeholder="60-minute yoga classes" value={svc} onChange={e=>{setSvc(e.target.value);setStep(3)}}/>
+            {err
+              ? <div style={{marginTop:7,fontSize:12,color:'#EF4444',display:'flex',alignItems:'center',gap:5}}><IClose size={13} stroke="#EF4444"/>Services you will trade is required.</div>
+              : <div style={{marginTop:6,fontSize:12,color:'var(--text-3)'}}>Be specific. "60-minute yoga classes" beats "wellness."</div>}
+          </div>
+          <div style={{marginTop:16}}>
+            <label className="label">What you need</label>
+            <textarea className="inp" style={{minHeight:68,resize:'vertical',lineHeight:1.5}} placeholder="Brand photography"/>
+            <div style={{marginTop:6,fontSize:12,color:'var(--text-3)'}}>What would you normally pay a vendor for?</div>
+          </div>
+          <div style={{marginTop:16}}>
+            <label className="label">Approximate annual revenue (optional)</label>
+            <select className="inp" defaultValue=""><option value="" disabled>Select a range</option>
+              <option>Under $250K</option><option>$250K – $1M</option><option>$1M – $5M</option><option>Over $5M</option></select>
+          </div>
+        </div>
+        <div style={{display:'flex',gap:12,marginTop:28}}>
+          <Btn onClick={()=>{if(!svc)setTried(true);else go('matches');}}>Submit application</Btn>
+          <Btn v="secondary" onClick={()=>go('matches')}>Explore the demo</Btn>
+        </div>
+      </div>
+    </div>
+  </div>;
+};
+
+// ── MultiParty cycle ──
+const MultiParty = ({go,onPropose})=>{
+  const cycleSvg=`<svg width="400" height="360" viewBox="0 0 400 360">
+    <defs>
+      <marker id="arh" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0,9 3.5,0 7" fill="#F0A500" opacity=".7"/>
+      </marker>
+      <path id="triLoop" d="M 200 44 L 72 288 L 328 288 Z" fill="none" stroke="none"/>
+    </defs>
+    <line x1="183" y1="73" x2="92" y2="248" stroke="#F0A500" stroke-width="1.5" stroke-dasharray="6 5" opacity=".45" marker-end="url(#arh)"/>
+    <line x1="107" y1="288" x2="277" y2="288" stroke="#F0A500" stroke-width="1.5" stroke-dasharray="6 5" opacity=".45" marker-end="url(#arh)"/>
+    <line x1="308" y1="260" x2="218" y2="86" stroke="#F0A500" stroke-width="1.5" stroke-dasharray="6 5" opacity=".45" marker-end="url(#arh)"/>
+    <circle r="8" fill="#F0A500" opacity=".9" filter="url(#g)">
+      <animateMotion dur="2.4s" repeatCount="indefinite" calcMode="linear"><mpath href="#triLoop"/></animateMotion>
+    </circle>
+    <g transform="translate(200,44)"><circle r="36" fill="#16181C" stroke="#2A2D35" stroke-width="1.5"/>
+      <text fill="#F0A500" font-size="22" font-weight="700" text-anchor="middle" dy="7" font-family="Inter,sans-serif">S</text></g>
+    <g transform="translate(72,288)"><circle r="36" fill="#16181C" stroke="#2A2D35" stroke-width="1.5"/>
+      <text fill="#2DD4AA" font-size="22" font-weight="700" text-anchor="middle" dy="7" font-family="Inter,sans-serif">L</text></g>
+    <g transform="translate(328,288)"><circle r="36" fill="#16181C" stroke="#2A2D35" stroke-width="1.5"/>
+      <text fill="#22C55E" font-size="22" font-weight="700" text-anchor="middle" dy="7" font-family="Inter,sans-serif">V</text></g>
+    <text x="200" y="102" fill="#8C8F99" font-size="11" text-anchor="middle" font-family="Inter,sans-serif">Sunrise Yoga</text>
+    <text x="200" y="116" fill="#52555E" font-size="10" text-anchor="middle" font-family="Inter,sans-serif">→ Yoga classes</text>
+    <text x="40" y="308" fill="#8C8F99" font-size="11" text-anchor="middle" font-family="Inter,sans-serif">Luminary</text>
+    <text x="40" y="322" fill="#52555E" font-size="10" text-anchor="middle" font-family="Inter,sans-serif">→ Photography</text>
+    <text x="360" y="308" fill="#8C8F99" font-size="11" text-anchor="middle" font-family="Inter,sans-serif">Verde Social</text>
+    <text x="360" y="322" fill="#52555E" font-size="10" text-anchor="middle" font-family="Inter,sans-serif">→ Social content</text>
+  </svg>`;
+  return <div style={{display:'flex',flexDirection:'column',alignItems:'center',padding:'40px 24px',textAlign:'center',gap:0}}>
+    <span style={{fontFamily:'var(--font-mono)',color:'var(--teal)',fontSize:11,letterSpacing:'.1em',marginBottom:12,display:'flex',alignItems:'center',gap:7,whiteSpace:'nowrap'}}>
+      <span style={{width:6,height:6,borderRadius:'50%',background:'var(--teal)',boxShadow:'0 0 6px var(--teal)'}}/>
+      Cycle detected by AI
+    </span>
+    <h2 style={{fontSize:28,fontWeight:600,letterSpacing:'-0.01em',margin:'0 0 12px'}}>Trades don't have to be one-for-one.</h2>
+    <p style={{color:'var(--text-2)',maxWidth:520,margin:'0 0 32px',fontSize:16,lineHeight:1.6}}>Reciproca links three or more businesses into one cycle, so each gives to one and receives from another, with no cash or trade currency.</p>
+    <div dangerouslySetInnerHTML={{__html:cycleSvg}} style={{maxWidth:400,width:'100%'}}/>
+    <div style={{marginTop:28}}><Btn onClick={()=>onPropose(MEMBERS[1])}>Propose cycle</Btn></div>
+  </div>;
+};
+
+// ── Matches ──
+const Matches = ({go,onPropose})=>{
+  const [tab,setTab]=useState('direct');
+  const tabStyle = (t) => ({padding:'9px 18px',borderRadius:8,fontSize:14,fontWeight:tab===t?600:400,
+    cursor:'pointer',background:tab===t?'var(--amber)':'transparent',color:tab===t?'#0E0F11':'var(--text-2)',border:'none',transition:'all .18s'});
+  return <div className="screen" style={{padding:'34px 0 64px',position:'relative'}}>
+    <div style={{position:'absolute',top:40,left:'50%',transform:'translateX(-50%)',width:700,height:420,
+      background:'radial-gradient(ellipse at center,rgba(240,165,0,.04),transparent 65%)',pointerEvents:'none'}}/>
+    <div className="container" style={{position:'relative'}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20,flexWrap:'wrap',gap:12}}>
+        <h1 style={{margin:0,fontSize:38,fontWeight:600,letterSpacing:'-0.01em'}}>Your matches</h1>
+        <div style={{display:'flex',background:'var(--obsidian)',border:'1px solid var(--hairline)',borderRadius:11,padding:3,gap:2}}>
+          <button style={tabStyle('direct')} onClick={()=>setTab('direct')}>Direct matches</button>
+          <button style={tabStyle('multi')} onClick={()=>setTab('multi')}>Multi-party</button>
+        </div>
+      </div>
+      {tab==='direct'&&<>
+        <SumBar offering="Yoga classes, 4x/month" looking="Brand photography"/>
+        <div style={{display:'flex',flexDirection:'column',gap:18}}>
+          {MATCHES.map((mt,i)=>(
+            <div key={mt.member.id} className={'match-card'+(mt.top?' top':'')}>
+              <MatchRing pct={mt.pct} delay={i*220}/>
+              <div style={{minWidth:0}}>
+                <div style={{display:'flex',alignItems:'flex-start',gap:12,flexWrap:'wrap'}}>
+                  <Chip name={mt.member.name}/>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:18,fontWeight:600,display:'flex',alignItems:'center',gap:7,flexWrap:'wrap'}}>
+                      {mt.member.name} <Vetted/>
+                      {mt.top&&<span className="pill amber"><svg width="11" height="11" viewBox="0 0 24 24" fill="#F0A500"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg> Top Match</span>}
+                    </div>
+                    <span className="tag" style={{marginTop:7,display:'inline-block'}}>{mt.member.industry}</span>
+                  </div>
+                </div>
+                <div style={{fontSize:14,marginTop:10}}><span style={{color:'var(--text-3)'}}>Trading</span> <span>{mt.member.trading}</span></div>
+                <div style={{fontSize:14,marginTop:6}}><span style={{color:'var(--text-3)'}}>Looking for</span> <span>{mt.member.looking}</span></div>
+                <ReasonBox text={mt.reason} typeIt={mt.top} startDelay={700}/>
+                <div style={{marginTop:16}}><Btn v={mt.top?'primary':'secondary'} block onClick={()=>onPropose(mt.member)}>Propose a trade</Btn></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </>}
+      {tab==='multi'&&<MultiParty go={go} onPropose={onPropose}/>}
+    </div>
+  </div>;
+};
+
+// ── Propose Modal ──
+const ProposeModal = ({member,onSend,onClose})=>(
+  <div className="scrim" onClick={onClose}>
+    <div className="modal" onClick={e=>e.stopPropagation()}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+        <h2 style={{margin:0,fontSize:22}}>Propose a trade</h2>
+        <button onClick={onClose} style={{background:'none',border:'none',cursor:'pointer',color:'var(--text-2)'}}><IClose size={20}/></button>
+      </div>
+      <SumBar offering="Yoga classes, 4x/month" looking={member?.trading||'Brand photography'} status={<Vetted/>}/>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:16}}>
+        <div><label className="label">You are offering</label><input className="inp" defaultValue="Yoga classes, 4x/month" readOnly style={{color:'var(--text-2)'}}/></div>
+        <div><label className="label">You are asking for</label><input className="inp" defaultValue={member?.trading||''}/></div>
+      </div>
+      <div style={{background:'#0c0d10',border:'1px solid var(--hairline)',borderRadius:10,padding:'11px 14px',fontSize:12,color:'var(--text-3)',lineHeight:1.6,marginBottom:20}}>
+        Barter transactions may be taxable income. Keep records of what you give and receive.
+      </div>
+      <div style={{display:'flex',gap:12}}><Btn onClick={onSend}>Send proposal</Btn><Btn v="secondary" onClick={onClose}>Not now</Btn></div>
+    </div>
+  </div>
+);
+
+// ── Rate Modal ──
+const RateModal = ({member,onSubmit,onClose})=>{
+  const [stars,setStars]=useState(0);
+  return <div className="scrim" onClick={onClose}>
+    <div className="modal" onClick={e=>e.stopPropagation()}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+        <h2 style={{margin:0,fontSize:22}}>Rate your trade</h2>
+        <button onClick={onClose} style={{background:'none',border:'none',cursor:'pointer',color:'var(--text-2)'}}><IClose size={20}/></button>
+      </div>
+      <p style={{color:'var(--text-2)',marginBottom:16}}>How did this trade go with <strong style={{color:'var(--text-1)'}}>{member?.name||'Luminary Studio'}</strong>?</p>
+      <StarPicker val={stars} onChange={setStars}/>
+      <div style={{fontSize:12,color:'var(--text-3)',marginTop:8,marginBottom:20}}>1 star = did not deliver. 5 = delivered as agreed.</div>
+      <textarea className="inp" style={{minHeight:72,resize:'vertical',lineHeight:1.5,marginBottom:20}} placeholder="What should other members know? (optional)"/>
+      <Btn block onClick={onSubmit} v={stars>0?'primary':'secondary'}>Submit rating</Btn>
+    </div>
+  </div>;
+};
+
+// ── Toast ──
+const Toast = ({msg})=>(
+  <div className="toast"><ICheck size={16} stroke="#22C55E"/>{msg}</div>
+);
+
+// ── Trade Success ──
+const TradeSuccess = ({trade,go,onRate})=>(
+  <div className="screen" style={{display:'flex',flexDirection:'column',alignItems:'center',textAlign:'center',padding:'88px 24px 48px',gap:18}}>
+    <span style={{width:72,height:72,borderRadius:'50%',background:'#14532D',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 0 28px rgba(34,197,94,.25)'}}>
+      <ICheck size={34} stroke="#22C55E" sw={3}/>
+    </span>
+    <div>
+      <h1 style={{fontSize:36,fontWeight:600,margin:'0 0 10px',letterSpacing:'-0.01em'}}>Trade proposed.</h1>
+      <p style={{color:'var(--text-2)',maxWidth:440,margin:'0 auto',fontSize:15}}>In a live account, both parties would be notified to accept, counter, or decline. For this demo, we simulate the confirmation.</p>
+    </div>
+    <SumBar offering="Yoga classes, 4x/month" looking={trade?.trading||'Brand photography'}
+      status={<span style={{fontSize:13,fontWeight:600,color:'#22C55E'}}>Proposed</span>}/>
+    <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
+      <Btn onClick={onRate}>Rate your partner</Btn>
+      <Btn v="secondary" onClick={()=>go('network')}>Browse more members</Btn>
+    </div>
+  </div>
+);
+
+// ── App ──
+function App(){
+  const [screen,setScreen]=useState('landing');
+  const [modal,setModal]=useState(null);
+  const [rateModal,setRateModal]=useState(false);
+  const [toast,setToast]=useState('');
+  const [tradeMember,setTradeMember]=useState(null);
+  const go=s=>{setScreen(s);window.scrollTo({top:0,behavior:'smooth'})};
+  const propose=m=>{setModal(m)};
+  const sendProposal=()=>{setTradeMember(modal);setModal(null);go('success')};
+  const submitRating=()=>{setRateModal(false);setToast('Rating submitted. It appears on their profile after review.');setTimeout(()=>{setToast('');go('network')},2600)};
+  return <div className="app">
+    <TopNav screen={screen} go={go}/>
+    {screen==='landing'&&<Landing go={go}/>}
+    {screen==='network'&&<BrowseNetwork go={go} onPropose={propose}/>}
+    {screen==='join'&&<Join go={go}/>}
+    {screen==='matches'&&<Matches go={go} onPropose={propose}/>}
+    {screen==='success'&&<TradeSuccess trade={tradeMember} go={go} onRate={()=>setRateModal(true)}/>}
+    {modal&&<ProposeModal member={modal} onSend={sendProposal} onClose={()=>setModal(null)}/>}
+    {rateModal&&<RateModal member={tradeMember} onSubmit={submitRating} onClose={()=>setRateModal(false)}/>}
+    {toast&&<Toast msg={toast}/>}
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

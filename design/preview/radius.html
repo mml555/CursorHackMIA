@@ -1,0 +1,29 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0}
+  .wrap{background:var(--ink);padding:24px 26px;display:flex;gap:22px;align-items:center;justify-content:space-between}
+  .item{display:flex;flex-direction:column;align-items:center;gap:12px}
+  .lab{font-family:var(--font-mono);font-size:10px;color:var(--text-2);text-align:center;line-height:1.5}
+  .lab b{color:var(--text-1);font-weight:500}
+  .shape{display:flex;align-items:center;justify-content:center;border:1px solid var(--hairline);background:var(--obsidian)}
+
+  /* each radius shown on its real component — non-uniform by design */
+  .tag{height:26px;padding:0 12px;border-radius:6px;color:var(--text-2);font-family:var(--font-ui);font-size:12px}
+  .btn{height:44px;padding:0 18px;border-radius:10px;background:var(--amber);border-color:transparent;color:#0E0F11;font-weight:600;font-size:14px;box-shadow:0 0 18px rgba(240,165,0,.25)}
+  .card{width:74px;height:58px;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+  /* squircle / superellipse — the organic alternative */
+  .squircle{width:62px;height:62px;border-radius:30px;border-color:rgba(240,165,0,.4);
+    -webkit-mask:radial-gradient(circle,#000 100%,#000);
+    border-radius:42% 58% 56% 44% / 50% 46% 54% 50%;background:linear-gradient(135deg,#1e2026,#16181c)}
+  .modal{width:84px;height:54px;border-radius:20px}
+  .pill{height:34px;padding:0 18px;border-radius:999px;color:var(--amber);font-family:var(--font-ui);font-size:13px;border-color:rgba(240,165,0,.4)}
+</style></head>
+<body><div class="wrap">
+  <div class="item"><div class="shape tag">Wellness</div><div class="lab"><b>6</b><br>tag</div></div>
+  <div class="item"><div class="shape btn">Apply</div><div class="lab"><b>10</b><br>button</div></div>
+  <div class="item"><div class="shape card"></div><div class="lab"><b>14</b><br>card</div></div>
+  <div class="item"><div class="shape modal"></div><div class="lab"><b>20</b><br>modal</div></div>
+  <div class="item"><div class="shape pill">Vetted</div><div class="lab"><b>full</b><br>pill</div></div>
+  <div class="item"><div class="shape squircle"></div><div class="lab"><b>organic</b><br>squircle</div></div>
+</div></body></html>

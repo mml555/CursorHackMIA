@@ -1,0 +1,49 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0}
+  .wrap{background:var(--ink);padding:22px 24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start}
+  .field{display:flex;flex-direction:column}
+  .lab{font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+  .state{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:999px}
+  .s-ok{color:#22C55E;background:rgba(34,197,94,.12)}
+  .s-foc{color:var(--amber);background:rgba(240,165,0,.14)}
+  .s-err{color:#EF4444;background:rgba(239,68,68,.12)}
+  .inp{height:44px;border-radius:10px;background:var(--surface-raised);border:1px solid var(--hairline);
+    display:flex;align-items:center;gap:8px;padding:0 13px;color:var(--text-1);font-family:var(--font-ui);font-size:14px}
+  .inp svg{width:15px;height:15px;flex:none}
+  .inp.ok{border-color:rgba(34,197,94,.55)}
+  .inp.foc{border-color:var(--amber);box-shadow:0 0 0 3px rgba(240,165,0,.2)}
+  .inp.err{border-color:#EF4444;box-shadow:0 0 0 3px rgba(239,68,68,.14)}
+  .caret{width:1px;height:17px;background:var(--amber);animation:bl 1s steps(1) infinite}
+  @keyframes bl{50%{opacity:0}}
+  .ph{color:var(--text-3)}
+  .msg{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px}
+  .msg.help{color:var(--text-3)}
+  .msg.bad{color:#EF4444}
+</style></head>
+<body><div class="wrap">
+
+  <div class="field">
+    <div class="lab">Business email <span class="state s-ok">valid</span></div>
+    <div class="inp ok">hello@sunriseyoga.co
+      <svg viewBox="0 0 24 24" style="margin-left:auto" fill="none" stroke="#22C55E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="msg help">Vetting uses your business domain.</div>
+  </div>
+
+  <div class="field">
+    <div class="lab">Services you'll trade <span class="state s-foc">focus</span></div>
+    <div class="inp foc">60-minute yoga classes<span class="caret"></span></div>
+    <div class="msg help">Be specific. "60-min yoga" beats "wellness."</div>
+  </div>
+
+  <div class="field">
+    <div class="lab">What you need <span class="state s-err">error</span></div>
+    <div class="inp err"><span class="ph">Add a service</span>
+      <svg viewBox="0 0 24 24" style="margin-left:auto" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+    </div>
+    <div class="msg bad">This field is required.</div>
+  </div>
+
+</div></body></html>

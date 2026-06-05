@@ -1,0 +1,50 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0}
+  .wrap{background:var(--ink);padding:22px 20px;display:flex;gap:16px;align-items:flex-start;justify-content:space-between}
+  .item{display:flex;flex-direction:column;align-items:center;gap:9px;flex:1}
+  .chip{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:20px;position:relative;border:1px solid var(--hairline)}
+  /* distinct subtle tints per member, amber-forward */
+  .c-s{background:radial-gradient(120% 120% at 30% 20%,#3a2c08,#16181c);color:#F0A500}
+  .c-l{background:radial-gradient(120% 120% at 30% 20%,#1d3330,#16181c);color:#2DD4AA}
+  .c-v{background:radial-gradient(120% 120% at 30% 20%,#13321f,#16181c);color:#22C55E}
+  .c-h{background:radial-gradient(120% 120% at 30% 20%,#33240f,#16181c);color:#FB923C}
+  .c-a{background:radial-gradient(120% 120% at 30% 20%,#2a2030,#16181c);color:#c9a6ff}
+  .c-x{background:radial-gradient(120% 120% at 30% 20%,#2a2d35,#16181c);color:#F4F4F2}
+  /* "you" — active amber ring */
+  .me{box-shadow:0 0 0 2px var(--amber),0 0 18px rgba(240,165,0,.3);border-color:transparent}
+  /* vetted micro badge */
+  .vb{position:absolute;right:-4px;bottom:-4px;width:18px;height:18px;border-radius:50%;background:#14532D;
+    border:2px solid #0E0F11;display:flex;align-items:center;justify-content:center}
+  .vb svg{width:9px;height:9px}
+  .nm{font-size:11px;color:var(--text-2);font-weight:500;white-space:nowrap}
+  .meta{font-family:var(--font-mono);font-size:9px;color:var(--text-3)}
+</style></head>
+<body><div class="wrap">
+  <div class="item">
+    <div class="chip c-s me">S<span class="vb"><svg viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+    <span class="nm">Sunrise</span><span class="meta">you</span>
+  </div>
+  <div class="item">
+    <div class="chip c-l">L<span class="vb"><svg viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+    <span class="nm">Luminary</span><span class="meta">4.8</span>
+  </div>
+  <div class="item">
+    <div class="chip c-v">V<span class="vb"><svg viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+    <span class="nm">Verde</span><span class="meta">4.7</span>
+  </div>
+  <div class="item">
+    <div class="chip c-h">H<span class="vb"><svg viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+    <span class="nm">Hill Co.</span><span class="meta">4.6</span>
+  </div>
+  <div class="item">
+    <div class="chip c-a">A<span class="vb"><svg viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+    <span class="nm">ATX Web</span><span class="meta">4.5</span>
+  </div>
+  <div class="item">
+    <div class="chip c-x">L<span class="vb"><svg viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+    <span class="nm">Lone Star</span><span class="meta">4.9</span>
+  </div>
+</div></body></html>

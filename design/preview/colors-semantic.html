@@ -1,0 +1,50 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0}
+  .wrap{background:var(--ink);padding:22px 24px;display:flex;gap:12px}
+  .item{flex:1;background:var(--obsidian);border:1px solid var(--hairline);border-radius:14px;padding:16px}
+  .head{display:flex;align-items:center;gap:10px}
+  .tile{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:none}
+  .tile svg{width:15px;height:15px}
+  .meta{display:flex;flex-direction:column;line-height:1.2}
+  .nm{font-size:13px;font-weight:600;color:var(--text-1)}
+  .hx{font-family:var(--font-mono);font-size:10px;color:var(--text-3);margin-top:2px}
+  .use{margin-top:13px;padding-top:12px;border-top:1px solid var(--hairline)}
+  .pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600}
+  .ln{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500}
+  .ln svg{width:13px;height:13px;flex:none}
+</style></head>
+<body><div class="wrap">
+
+  <div class="item">
+    <div class="head">
+      <span class="tile" style="background:rgba(34,197,94,.1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#3FB36C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+      <span class="meta"><span class="nm">Success</span><span class="hx">#22C55E · fill #14532D</span></span>
+    </div>
+    <div class="use"><span class="pill" style="background:#14532D;color:#7BD49B">Vetted</span></div>
+  </div>
+
+  <div class="item">
+    <div class="head">
+      <span class="tile" style="background:rgba(251,146,60,.1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#E29355" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+      </span>
+      <span class="meta"><span class="nm">Warning</span><span class="hx">#FB923C</span></span>
+    </div>
+    <div class="use"><span class="ln" style="color:#E29355">Under review</span></div>
+  </div>
+
+  <div class="item">
+    <div class="head">
+      <span class="tile" style="background:rgba(239,68,68,.1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D86464" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </span>
+      <span class="meta"><span class="nm">Destructive</span><span class="hx">#EF4444</span></span>
+    </div>
+    <div class="use"><span class="ln" style="color:#D86464">Services is required</span></div>
+  </div>
+
+</div></body></html>

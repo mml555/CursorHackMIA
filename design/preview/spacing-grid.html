@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0}
+  .wrap{background:var(--ink);padding:20px 24px;display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:center}
+
+  .panel-lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .panel-lbl::after{content:"";flex:1;height:1px;background:var(--hairline)}
+
+  /* scale */
+  .step{display:grid;grid-template-columns:36px 1fr 24px;align-items:center;gap:12px;height:21px}
+  .tok{font-family:var(--font-mono);font-size:11px;color:var(--amber)}
+  .seg{height:8px;border-radius:3px;background:linear-gradient(90deg,#F0A500,#D49200);box-shadow:0 0 10px rgba(240,165,0,.2)}
+  .px{font-family:var(--font-mono);font-size:10px;color:var(--text-3);text-align:right}
+
+  /* demo */
+  .demo{position:relative}
+  .plabel{font-family:var(--font-mono);font-size:9px;color:var(--amber);display:inline-flex;align-items:center;gap:6px;margin-bottom:8px}
+  .plabel::before{content:"";width:14px;height:1px;background:rgba(240,165,0,.5)}
+  .card{background:var(--obsidian);border:1px solid var(--hairline);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.4);position:relative}
+  .innerpad{position:absolute;inset:0;margin:14px;border:1px dashed rgba(240,165,0,.16);border-radius:8px;pointer-events:none}
+  .inner{position:relative;padding:18px;display:flex;flex-direction:column;gap:12px}
+  .head{display:flex;align-items:center;gap:11px}
+  .av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#2a2d35,#1e2026);flex:none}
+  .l1{height:9px;width:104px;background:#30343d;border-radius:3px}
+  .l2{height:7px;width:70px;background:#23262d;border-radius:3px;margin-top:7px}
+  .row{height:8px;background:#23262d;border-radius:3px}
+  .gaprow{position:absolute;right:14px;top:70px;display:flex;align-items:center;gap:6px}
+  .gline{width:14px;height:1px;background:var(--amber);opacity:.5;position:relative}
+  .gline::before,.gline::after{content:"";position:absolute;width:1px;height:7px;background:var(--amber);opacity:.5;top:-3px}
+  .gline::before{left:0}.gline::after{right:0}
+  .glab{font-family:var(--font-mono);font-size:9px;color:var(--text-3)}
+</style></head>
+<body><div class="wrap">
+  <div>
+    <div class="panel-lbl">4px base scale</div>
+    <div class="step"><span class="tok">s1</span><div class="seg" style="width:6px"></div><span class="px">4</span></div>
+    <div class="step"><span class="tok">s2</span><div class="seg" style="width:13px"></div><span class="px">8</span></div>
+    <div class="step"><span class="tok">s4</span><div class="seg" style="width:26px"></div><span class="px">16</span></div>
+    <div class="step"><span class="tok">s6</span><div class="seg" style="width:40px"></div><span class="px">24</span></div>
+    <div class="step"><span class="tok">s8</span><div class="seg" style="width:54px"></div><span class="px">32</span></div>
+    <div class="step"><span class="tok">s12</span><div class="seg" style="width:82px"></div><span class="px">48</span></div>
+    <div class="step"><span class="tok">s24</span><div class="seg" style="width:100%"></div><span class="px">96</span></div>
+  </div>
+
+  <div>
+    <div class="panel-lbl">Spacing in use</div>
+    <div class="demo">
+      <span class="plabel">padding 24</span>
+      <div class="card">
+        <div class="innerpad"></div>
+        <div class="inner">
+          <div class="head"><span class="av"></span><div><div class="l1"></div><div class="l2"></div></div></div>
+          <div class="row" style="width:86%"></div>
+          <div class="row" style="width:62%"></div>
+        </div>
+        <div class="gaprow"><span class="gline"></span><span class="glab">gap 12</span></div>
+      </div>
+    </div>
+  </div>
+</div></body></html>

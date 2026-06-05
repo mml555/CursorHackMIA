@@ -1,0 +1,50 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0}
+  .wrap{background:var(--ink);padding:0}
+  .nav{height:64px;display:flex;align-items:center;gap:12px;padding:0 16px;position:relative;
+    background:var(--ink);border-bottom:1px solid var(--hairline)}
+
+  /* brand lockup with real mark */
+  .brand{display:flex;align-items:center;gap:9px}
+  .badge{width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+  .badge img{width:32px;height:32px;object-fit:contain;display:block}
+  .wm{font-weight:700;font-size:18px;letter-spacing:-0.02em}
+  .beta{font-family:var(--font-mono);font-size:8px;letter-spacing:.14em;color:var(--text-3);border:1px solid var(--hairline);border-radius:4px;padding:2px 5px}
+
+  /* segmented nav — flat, active is solid amber, no gradient */
+  .seg{display:flex;background:var(--obsidian);border:1px solid var(--hairline);border-radius:11px;padding:3px;gap:2px;margin-left:6px}
+  .seg a{font-size:13px;color:var(--text-2);padding:7px 12px;border-radius:8px;text-decoration:none;display:flex;align-items:center;gap:6px}
+  .seg a .n{font-family:var(--font-mono);font-size:10px;color:var(--text-3)}
+  .seg a.on{background:var(--amber);color:#0E0F11;font-weight:600}
+  .seg a.on .n{color:rgba(14,15,17,.55)}
+
+  .right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  /* neutral status, single amber dot */
+  .status{display:flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:11px;color:var(--text-2);
+    border:1px solid var(--hairline);border-radius:999px;padding:6px 12px;white-space:nowrap}
+  .status .dot{width:6px;height:6px;border-radius:50%;background:var(--amber)}
+  /* CTA — flat amber, restrained */
+  .cta{display:flex;align-items:center;gap:6px;background:var(--amber);color:#0E0F11;font-size:13px;font-weight:600;border-radius:10px;padding:9px 14px;white-space:nowrap}
+  .cta svg{width:14px;height:14px}
+  .av{width:34px;height:34px;border-radius:50%;background:var(--surface-raised);border:1px solid var(--hairline);
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--text-1)}
+</style></head>
+<body><div class="wrap">
+  <div class="nav">
+    <div class="brand">
+      <span class="badge"><img src="../assets/reciproca-mark.png" alt="Reciproca"></span>
+      <span class="wm">Reciproca</span><span class="beta">BETA</span>
+    </div>
+    <div class="seg">
+      <a class="on">Matches <span class="n">4</span></a>
+      <a>Network <span class="n">47</span></a>
+      <a>Trades <span class="n">2</span></a>
+    </div>
+    <div class="right">
+      <span class="status"><span class="dot"></span>47 vetted</span>
+      <span class="cta"><svg viewBox="0 0 24 24" fill="none" stroke="#0E0F11" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Propose</span>
+    </div>
+  </div>
+</div></body></html>

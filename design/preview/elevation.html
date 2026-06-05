@@ -1,0 +1,39 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0}
+  .wrap{background:var(--ink);padding:26px 28px;display:flex;gap:20px;align-items:stretch}
+  .item{flex:1;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center}
+  .cap{font-family:var(--font-mono);font-size:10px;color:var(--text-2);text-align:center;line-height:1.6}
+  .cap b{color:var(--text-1);font-weight:500}
+
+  /* mini card silhouette */
+  .mini{width:170px;background:var(--obsidian);border:1px solid var(--hairline);border-radius:14px;padding:14px;display:flex;align-items:center;gap:11px}
+  .mini.rest{box-shadow:0 1px 3px rgba(0,0,0,.4)}
+  .mini.glow{border-color:rgba(240,165,0,.5);box-shadow:0 0 24px rgba(240,165,0,.22)}
+  .av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#2a2d35,#1e2026);flex:none}
+  .ln1{height:8px;width:74px;background:#30343d;border-radius:3px}
+  .ln2{height:6px;width:50px;background:#23262d;border-radius:3px;margin-top:6px}
+
+  /* focus ring on a real input */
+  .focusbox{display:flex;flex-direction:column;align-items:center;gap:0}
+  .input{width:170px;height:42px;background:var(--surface-raised);border:1px solid var(--amber);border-radius:10px;
+    display:flex;align-items:center;padding:0 13px;color:var(--text-1);font-family:var(--font-ui);font-size:14px;
+    box-shadow:0 0 0 2px rgba(240,165,0,.35);}
+  .caret{width:1px;height:17px;background:var(--amber);margin-left:1px;animation:bl 1s steps(1) infinite}
+  @keyframes bl{50%{opacity:0}}
+</style></head>
+<body><div class="wrap">
+  <div class="item">
+    <div class="mini rest"><span class="av"></span><div><div class="ln1"></div><div class="ln2"></div></div></div>
+    <div class="cap"><b>Card at rest</b><br>0 1px 3px rgba(0,0,0,.4)</div>
+  </div>
+  <div class="item">
+    <div class="mini glow"><span class="av"></span><div><div class="ln1"></div><div class="ln2"></div></div></div>
+    <div class="cap"><b>Amber glow</b> · top match / CTA<br>0 0 20px rgba(240,165,0,.25)</div>
+  </div>
+  <div class="item">
+    <div class="input">hello@sunriseyoga.co<span class="caret"></span></div>
+    <div class="cap" style="margin-top:14px"><b>Focus ring</b><br>2px amber · 2px offset</div>
+  </div>
+</div></body></html>

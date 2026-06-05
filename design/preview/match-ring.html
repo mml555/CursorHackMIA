@@ -1,0 +1,26 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0}
+  .wrap{background:var(--ink);padding:24px 28px;display:flex;gap:40px;align-items:center}
+  .ringbox{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .lbl{font-family:var(--font-mono);font-size:10px;color:var(--text-3)}
+  .center{position:relative;width:64px;height:64px}
+  .center .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:16px;font-weight:500;color:var(--amber)}
+  .pill{display:inline-flex;align-items:center;gap:6px;background:rgba(240,165,0,.12);color:var(--amber);border:1px solid var(--amber);border-radius:999px;padding:4px 11px;font-size:11px;font-weight:600;white-space:nowrap}
+</style></head>
+<body><div class="wrap">
+  <div class="ringbox"><span class="lbl">STANDARD</span>
+    <div class="center">
+      <svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="#2A2D35" stroke-width="6"/><circle cx="32" cy="32" r="28" fill="none" stroke="#F0A500" stroke-width="6" stroke-linecap="round" stroke-dasharray="175.9" stroke-dashoffset="38.7" transform="rotate(-90 32 32)"/></svg>
+      <span class="num">78%</span>
+    </div>
+  </div>
+  <div class="ringbox"><span class="lbl">85%+ · GLOW</span>
+    <div class="center" style="filter:drop-shadow(0 0 16px rgba(240,165,0,.35))">
+      <svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="#2A2D35" stroke-width="6"/><circle cx="32" cy="32" r="28" fill="none" stroke="#F0A500" stroke-width="6" stroke-linecap="round" stroke-dasharray="175.9" stroke-dashoffset="10.6" transform="rotate(-90 32 32)"/></svg>
+      <span class="num">94%</span>
+    </div>
+  </div>
+  <span class="pill">★ Top Match</span>
+</div></body></html>
