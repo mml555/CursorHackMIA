@@ -43,6 +43,15 @@ export const onboardingSocialSchema = z.object({
   linkedin: optionalUrlSchema,
 });
 
+export const discoveryDemoInterestSchema = z.object({
+  targetBusinessId: z.string().uuid(),
+});
+
+export const discoverySwipeSchema = z.object({
+  targetBusinessId: z.string().uuid(),
+  action: z.enum(["interested", "pass", "save"]),
+});
+
 export const onboardingConsentSchema = z.object({
   scrapeConsent: z.literal(true),
   consentVersion: z.literal(SCRAPE_CONSENT_VERSION),

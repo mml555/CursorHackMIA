@@ -1,19 +1,24 @@
 import http from "node:http";
 import { loadEnv } from "./env.mjs";
-import { requireClerkUserId } from "./auth.mjs";
+import { getClerkUserId, requireClerkUserId } from "./auth.mjs";
 import { createOnboardingService } from "./onboarding.mjs";
+import { createDiscoveryService } from "./discovery.mjs";
 import {
   onboardingCompanySchema,
   onboardingServicesSchema,
   onboardingSocialSchema,
   onboardingConsentSchema,
+  discoveryDemoInterestSchema,
+  discoverySwipeSchema,
 } from "./schemas.mjs";
 
 const env = loadEnv();
-const onboarding = createOnboardingService({
+const supabaseConfig = {
   supabaseUrl: env.supabaseUrl,
   supabaseServiceRoleKey: env.supabaseServiceRoleKey,
-});
+};
+const onboarding = createOnboardingService(supabaseConfig);
+const discovery = createDiscoveryService(supabaseConfig);
 
 function json(res, status, body) {
   res.writeHead(status, {
@@ -106,6 +111,52 @@ async function handleOnboarding(req, res, pathname, method) {
   failure(res, Object.assign(new Error("Not found"), { status: 404, code: "NOT_FOUND" }));
 }
 
+async function handleDiscovery(req, res, pathname, method) {
+  if (pathname === "/discovery/network" && method === "GET") {
+    const url = new URL(req.url ?? "/", "http://localhost");
+    const payload = await discovery.getNetwork({
+      metro: url.searchParams.get("metro") ?? undefined,
+      industry: url.searchParams.get("industry") ?? undefined,
+      query: url.searchParams.get("q") ?? undefined,
+    });
+    return success(res, payload);
+  }
+
+  if (pathname === "/discovery/stats" && method === "GET") {
+    const url = new URL(req.url ?? "/", "http://localhost");
+    const metro = url.searchParams.get("metro") ?? undefined;
+    const payload = await discovery.getStats(metro);
+    return success(res, payload);
+  }
+
+  if (pathname === "/discovery/recommendations" && method === "GET") {
+    const clerkUserId = await getClerkUserId(req, env.clerkSecretKey);
+    const payload = await discovery.getRecommendations(clerkUserId);
+    return success(res, payload);
+  }
+
+  if (pathname === "/discovery/demo-interest" && method === "POST") {
+    const body = discoveryDemoInterestSchema.parse(await readJson(req));
+    const payload = await discovery.recordDemoInterest(body.targetBusinessId);
+    return success(res, payload);
+  }
+
+  if (pathname === "/discovery/swipe" && method === "POST") {
+    const clerkUserId = await requireClerkUserId(req, env.clerkSecretKey);
+    const body = discoverySwipeSchema.parse(await readJson(req));
+    const payload = await discovery.recordSwipe(clerkUserId, body);
+    return success(res, payload);
+  }
+
+  if (pathname === "/discovery/matches" && method === "GET") {
+    const clerkUserId = await requireClerkUserId(req, env.clerkSecretKey);
+    const payload = await discovery.listMatches(clerkUserId);
+    return success(res, payload);
+  }
+
+  failure(res, Object.assign(new Error("Not found"), { status: 404, code: "NOT_FOUND" }));
+}
+
 const server = http.createServer(async (req, res) => {
   applyCors(req, res);
 
@@ -120,15 +171,28 @@ const server = http.createServer(async (req, res) => {
 
   try {
     if (pathname === "/health" && req.method === "GET") {
+      let supabase = "error";
+      try {
+        await discovery.checkSupabase();
+        supabase = "ok";
+      } catch (cause) {
+        console.error("[onboarding-api] supabase health check failed", cause);
+      }
+
       return success(res, {
         status: "ok",
         service: "reciproca-onboarding-api",
         timestamp: new Date().toISOString(),
+        checks: { supabase },
       });
     }
 
     if (pathname.startsWith("/onboarding")) {
       return await handleOnboarding(req, res, pathname, req.method ?? "GET");
+    }
+
+    if (pathname.startsWith("/discovery")) {
+      return await handleDiscovery(req, res, pathname, req.method ?? "GET");
     }
 
     failure(res, Object.assign(new Error("Not found"), { status: 404, code: "NOT_FOUND" }));

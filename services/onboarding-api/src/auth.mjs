@@ -8,6 +8,19 @@ function getRequestHeader(req, name) {
   return "";
 }
 
+export async function getClerkUserId(req, secretKey) {
+  const header = getRequestHeader(req, "authorization");
+  const match = header.match(/^Bearer\s+(.+)$/i);
+  if (!match) return null;
+
+  try {
+    const payload = await verifyToken(match[1], { secretKey });
+    return payload.sub ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function requireClerkUserId(req, secretKey) {
   const header = getRequestHeader(req, "authorization");
   const match = header.match(/^Bearer\s+(.+)$/i);

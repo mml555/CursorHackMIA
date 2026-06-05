@@ -23,7 +23,7 @@ cp .env.example .env.local   # Clerk keys + BACKEND_API_URL + Supabase (see .env
 
 # 3. Database (local Supabase — for listings, matching, etc.)
 npm run db:start    # first time
-npm run db:reset    # apply migrations + seed Austin demo businesses
+npm run db:reset    # apply migrations + seed 50 Austin demo businesses
 
 # 4. Supabase env (paste from: supabase status -o env)
 #    NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
@@ -92,7 +92,8 @@ For local dev without a real backend: `npm run mock:backend` then set `BACKEND_A
 | `npm run mock:backend` | Local mock onboarding backend |
 | `npm run test:onboarding` | Smoke test onboarding flow |
 | `npm run db:start` | Local Supabase stack |
-| `npm run db:reset` | Reset DB + run migrations + `supabase/seed.sql` |
+| `npm run db:reset` | Reset DB + migrations + `seed.sql` swipes + 50 businesses script |
+| `npm run db:seed:businesses` | Upsert 50 businesses only (no DB reset) |
 | `npm run db:seed` | Alias for `db:reset` |
 | `npm run db:push` | Push migrations to linked remote |
 | `npm run db:types` | Regenerate TS types from local DB |
@@ -118,19 +119,19 @@ The `/demo` UI reads live data from these routes (public; no auth required):
 
 | Route | Purpose |
 |-------|---------|
-| `GET /api/discovery/network` | Approved businesses (`?metro=Austin&industry=Wellness&q=`) |
-| `GET /api/discovery/stats` | Network count and industries |
-| `GET /api/discovery/recommendations` | AI-ranked matches (demo focal: Sunrise Yoga) |
-| `POST /api/discovery/demo-interest` | Record demo swipe when viewer is not signed in |
+| `GET /api/discovery/network` | `GET {BACKEND_API_URL}/discovery/network` |
+| `GET /api/discovery/stats` | `GET {BACKEND_API_URL}/discovery/stats` |
+| `GET /api/discovery/recommendations` | `GET {BACKEND_API_URL}/discovery/recommendations` |
+| `POST /api/discovery/demo-interest` | `POST {BACKEND_API_URL}/discovery/demo-interest` |
 
 Authenticated members with an approved business also use:
 
 | Route | Purpose |
 |-------|---------|
-| `POST /api/discovery/swipe` | Member discovery swipe (interested / pass / save) |
-| `GET /api/discovery/matches` | Mutual matches after both sides swipe interested |
+| `POST /api/discovery/swipe` | `POST {BACKEND_API_URL}/discovery/swipe` |
+| `GET /api/discovery/matches` | `GET {BACKEND_API_URL}/discovery/matches` |
 
-**Seed data:** `supabase/seed.sql` inserts 6 Austin businesses with offers/needs. Re-run `npm run db:reset` after changing seed or migrations.
+**Seed data:** `scripts/seed-random-businesses.mjs` upserts 50 approved Austin businesses (6 curated demo + 44 generated) with offers/needs; runs automatically after `npm run db:reset`. Re-seed without reset: `npm run db:seed:businesses`. `supabase/seed.sql` adds demo discovery swipes only.
 
 ## Clerk CLI (optional)
 
