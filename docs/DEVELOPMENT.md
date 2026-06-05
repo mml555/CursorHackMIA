@@ -1,43 +1,54 @@
-# Reciproca — development
+# Reciproca — development (middleware / BFF)
 
-Monorepo layout: Next.js app at **repo root**, Supabase in **`supabase/`**, product docs in **`docs/`**.
+Next.js at **repo root** acts as the **middleware layer** between the frontend and your backend API. No local database is required for onboarding.
 
 ## Prerequisites
 
 - Node.js 20+
-- [Clerk CLI](https://clerk.com/docs/cli) (optional): `curl -fsSL https://clerk.com/install | bash`
-- [Supabase CLI](https://supabase.com/docs/guides/cli): `npm install -g supabase` or use the devDependency via `npx supabase`
+- Clerk app (for auth)
+- A backend service exposing `/onboarding/*` routes (see below)
 
 ## Quick start
 
 ```bash
-# 1. Install dependencies
 npm install
-
-# 2. Environment (copy names only; fill from dashboards)
-cp .env.example .env.local
-
-# 3. Database (local Supabase)
-npm run db:start    # first time
-npm run db:reset    # apply supabase/migrations/20260604120000_initial_schema.sql
-
-# 4. Run the web app
+cp .env.example .env.local   # fill Clerk keys + BACKEND_API_URL
 npm run dev
 ```
 
-Open http://localhost:3000 — use **Sign up** in the header to create a test user.
+Open http://localhost:3000 — **Sign up** redirects to `/onboarding`.
 
-## Stack
+**Important:** Put env vars in `.env.local` at the **repo root**. Next.js does not load `.env/.env`.
+
+## Architecture
+
+```
+Browser  →  /api/onboarding/*  (Next.js middleware)
+                ↓ Clerk session + Zod validation
+           BACKEND_API_URL/onboarding/*
+```
 
 | Layer | Location |
 |-------|----------|
-| Next.js (App Router) | `src/app/` |
-| Clerk auth | `src/proxy.ts`, `src/app/sign-in`, `src/app/sign-up` |
-| Clerk webhook → profiles | `src/app/api/webhooks/clerk/` |
-| Supabase (Postgres) | `supabase/migrations/` |
-| API routes | `src/app/api/` |
+| Onboarding UI | `src/app/onboarding/` |
+| Middleware API | `src/app/api/onboarding/` |
+| Backend client | `src/lib/backend/` |
+| Onboarding schemas | `src/lib/onboarding/schemas.ts` |
 
-**Clerk app ID:** `app_3Eh29Yn9v2NqcMHuCpQIOZ85uS4`
+## Backend contract
+
+The middleware forwards these routes (with `Authorization: Bearer <clerk_token>`):
+
+| Middleware route | Forwards to |
+|------------------|-------------|
+| `GET /api/onboarding/status` | `GET {BACKEND_API_URL}/onboarding/status` |
+| `PATCH /api/onboarding/company` | `PATCH {BACKEND_API_URL}/onboarding/company` |
+| `PUT /api/onboarding/services` | `PUT {BACKEND_API_URL}/onboarding/services` |
+| `PATCH /api/onboarding/social` | `PATCH {BACKEND_API_URL}/onboarding/social` |
+| `POST /api/onboarding/consent` | `POST {BACKEND_API_URL}/onboarding/consent` |
+| `POST /api/onboarding/complete` | `POST {BACKEND_API_URL}/onboarding/complete` |
+
+Responses should use `{ "data": ... }` or `{ "error": { "code", "message" } }`.
 
 ## Commands
 
@@ -46,41 +57,11 @@ Open http://localhost:3000 — use **Sign up** in the header to create a test us
 | `npm run dev` | Next.js dev server |
 | `npm run build` | Production build |
 | `npm run lint` | ESLint |
-| `npm run db:start` | Local Supabase stack |
-| `npm run db:reset` | Reset DB + run migrations |
-| `npm run db:push` | Push migrations to linked remote |
-| `npm run db:types` | Regenerate TS types from local DB |
 
-## Clerk CLI (optional)
+## Health check
 
-```bash
-export PATH="$HOME/.local/bin:$PATH"
-clerk auth login
-clerk link --app app_3Eh29Yn9v2NqcMHuCpQIOZ85uS4
-clerk doctor
-```
+`GET /api/health` reports whether `CLERK_SECRET_KEY` and `BACKEND_API_URL` are set.
 
-## Auth + data model
+## Legacy note
 
-- **Clerk** is the identity provider (sessions in Next.js).
-- **Supabase** is data-only; `profiles.clerk_user_id` syncs via webhook (`user.created` / `user.updated`).
-- MVP API routes validate Clerk, then query Supabase with the **service role** (server-only).
-
-See [PRD §8.3](./PRD.md) for the full auth strategy.
-
-## Project structure
-
-```
-/
-├── src/                    # Next.js app
-├── public/
-├── supabase/
-│   ├── config.toml
-│   └── migrations/
-│       └── 20260604120000_initial_schema.sql
-├── docs/
-│   ├── PRD.md
-│   └── DEVELOPMENT.md      # this file
-├── package.json
-└── .env.example
-```
+Older routes under `/api/businesses`, `/api/listings`, etc. still reference Supabase from an earlier scaffold. **Onboarding does not use them.** You can ignore Supabase entirely while working on the middleware + backend flow.
