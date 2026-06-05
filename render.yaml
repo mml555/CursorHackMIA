@@ -1,0 +1,26 @@
+# Render Blueprint — onboarding API
+# Docs: https://render.com/docs/blueprint-spec
+#
+# After deploy, set BACKEND_API_URL on Vercel to the Render service URL.
+
+services:
+  - type: web
+    name: reciproca-onboarding-api
+    runtime: node
+    plan: free
+    rootDir: services/onboarding-api
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false

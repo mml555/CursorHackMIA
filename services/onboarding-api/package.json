@@ -1,0 +1,18 @@
+{
+  "name": "reciproca-onboarding-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "dev": "node --watch src/server.mjs"
+  },
+  "dependencies": {
+    "@clerk/backend": "^2.4.0",
+    "@supabase/supabase-js": "^2.107.0",
+    "zod": "^4.4.3"
+  }
+}

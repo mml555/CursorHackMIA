@@ -113,6 +113,8 @@ $$;
 COMMENT ON FUNCTION public.business_profile_complete IS
   'True when description, logo, and at least one gallery photo are present';
 
+DROP FUNCTION IF EXISTS public.get_business_matches(uuid);
+DROP FUNCTION IF EXISTS public.get_discovery_deck(uuid);
 DROP VIEW IF EXISTS public.business_match_details;
 DROP VIEW IF EXISTS public.business_discovery_cards;
 
@@ -178,5 +180,37 @@ JOIN public.business_discovery_cards partner
 
 COMMENT ON VIEW public.business_match_details IS
   'Matched partners with profile media and listing summary';
+
+CREATE OR REPLACE FUNCTION public.get_discovery_deck(p_swiper_business_id uuid)
+RETURNS SETOF public.business_discovery_cards
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT c.*
+  FROM public.business_discovery_cards c
+  WHERE c.business_id <> p_swiper_business_id
+    AND NOT EXISTS (
+      SELECT 1
+      FROM public.business_discovery_swipes s
+      WHERE s.swiper_business_id = p_swiper_business_id
+        AND s.target_business_id = c.business_id
+    )
+  ORDER BY c.reputation_score DESC NULLS LAST, c.company_name;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_business_matches(p_viewer_business_id uuid)
+RETURNS SETOF public.business_match_details
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT m.*
+  FROM public.business_match_details m
+  WHERE m.viewer_business_id = p_viewer_business_id
+  ORDER BY m.matched_at DESC;
+$$;
 
 ALTER TABLE public.business_photos ENABLE ROW LEVEL SECURITY;

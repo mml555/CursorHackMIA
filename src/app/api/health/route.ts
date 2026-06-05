@@ -10,6 +10,11 @@ export async function GET() {
     checks: {
       clerk: process.env.CLERK_SECRET_KEY ? "configured" : "missing_env",
       backend: process.env.BACKEND_API_URL ? "configured" : "missing_env",
+      supabase:
+        process.env.NEXT_PUBLIC_SUPABASE_URL &&
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+          ? "configured"
+          : "missing_env",
     },
   });
 }

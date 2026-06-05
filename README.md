@@ -6,6 +6,8 @@
 
 **Run the app:** [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — Next.js 16, Clerk, Supabase (`npm run dev` from repo root).
 
+**Deploy:** [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — Vercel (web) + Render (onboarding API).
+
 > **Reading note:** Every financial figure is an **illustrative model with stated assumptions**, flagged `[MODEL]` — not a claim of fact. Market sizes are `[VERIFIED]` from cited sources (see end).
 
 ---

@@ -2,6 +2,8 @@
 
 Next.js at **repo root** is the web app and **middleware/BFF** for onboarding. Supabase Postgres lives in **`supabase/`** for listings, matching, and business data.
 
+**Deploy:** [docs/DEPLOYMENT.md](./DEPLOYMENT.md) — Vercel (web) + Render (onboarding API).
+
 ## Prerequisites
 
 - Node.js 20+
