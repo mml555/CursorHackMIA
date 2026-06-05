@@ -95,8 +95,8 @@ export async function checkSupabaseConnection(): Promise<{
     if (error) {
       const message = error.message ?? "Supabase query failed";
       let hint = "Check Vercel logs for details.";
-      if (message.includes("does not exist")) {
-        hint = "Run migrations on this project: supabase link && npm run db:push";
+      if (message.includes("does not exist") || message.includes("schema cache")) {
+        hint = "Run migrations on this project: supabase link --project-ref <ref> && npm run db:push";
       } else if (message.includes("JWT")) {
         hint = "Service role key may be invalid or from another project.";
       }

@@ -159,6 +159,9 @@ Do not point preview builds at production Supabase without a branch DB.
 | Render `/health` missing `checks.supabase` | Old deploy — **Manual Deploy** on Render after pushing latest `main` |
 | Discovery 404 on Render | Same — redeploy onboarding API; `/discovery/stats` should return JSON |
 | Vercel `supabaseConnection: error` + localhost host | `NEXT_PUBLIC_SUPABASE_URL` must be `https://<ref>.supabase.co`, not `127.0.0.1` |
+| Discovery 500 + `ENOTFOUND *.supabase.co` on Render | Render `SUPABASE_URL` points at a deleted/paused project — use the **same** ref as Vercel |
+| `business_discovery_cards` not in schema cache | Run `supabase link --project-ref <ref>` then `npm run db:push` on that project |
+| Clerk “development keys” in browser | Use **production** Clerk keys on Vercel Production (Dashboard → API Keys) |
 | `supabase status` fails parsing `.env` | Remove invalid lines from `.env` (use `.env.local` for secrets) |
 | Clerk webhook 400 | `CLERK_WEBHOOK_SIGNING_SECRET` matches dashboard |
 
