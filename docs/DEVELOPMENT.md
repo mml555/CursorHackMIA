@@ -131,7 +131,7 @@ Authenticated members with an approved business also use:
 | `POST /api/discovery/swipe` | `POST {BACKEND_API_URL}/discovery/swipe` |
 | `GET /api/discovery/matches` | `GET {BACKEND_API_URL}/discovery/matches` |
 
-**Seed data:** `scripts/seed-random-businesses.mjs` upserts 50 approved Austin businesses (6 curated demo + 44 generated) with offers/needs; runs automatically after `npm run db:reset`. Re-seed without reset: `npm run db:seed:businesses`. `supabase/seed.sql` adds demo discovery swipes only.
+**Seed data:** `scripts/seed-random-businesses.mjs` upserts **150** approved businesses by default (6 curated + generated; Austin/Dallas/Houston), offers/needs, and discovery swipes/matches. Override count: `SEED_BUSINESS_COUNT=200 npm run db:seed:businesses`. Runs after `npm run db:reset`. `supabase/seed.sql` adds two extra demo swipes when using SQL reset path.
 
 **Remote / staging Supabase** (legacy schema → Reciproca migrations):
 

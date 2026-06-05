@@ -73,11 +73,14 @@ function buildConnectionString() {
 
   const encodedPassword = encodeURIComponent(password);
 
+  const sslQuery = "uselibpqcompat=true&sslmode=require";
+
   if (host.includes("pooler")) {
-    return `postgresql://${user}.${ref}:${encodedPassword}@${host}:${port}/${database}`;
+    const poolerUser = encodeURIComponent(`${user}.${ref}`);
+    return `postgresql://${poolerUser}:${encodedPassword}@${host}:${port}/${database}?${sslQuery}`;
   }
 
-  return `postgresql://${user}:${encodedPassword}@${host}:${port}/${database}?sslmode=require`;
+  return `postgresql://${user}:${encodedPassword}@${host}:${port}/${database}?${sslQuery}`;
 }
 
 function migrationFiles() {
@@ -87,10 +90,11 @@ function migrationFiles() {
     .filter((f) => f.endsWith(".sql"))
     .sort()
     .map((f) => join(migrationsDir, f));
-  const seedSqlPath = resolve("supabase/seed.sql");
-  return existsSync(seedSqlPath)
-    ? [resetPath, ...files, seedSqlPath]
-    : [resetPath, ...files];
+  return [resetPath, ...files];
+}
+
+function seedSwipeSqlPath() {
+  return resolve("supabase/seed.sql");
 }
 
 async function runSqlFilePg(client, filePath) {
@@ -175,6 +179,25 @@ async function main() {
     if (seed.status !== 0) {
       process.exit(seed.status ?? 1);
     }
+  }
+
+  const swipeSql = seedSwipeSqlPath();
+  if (existsSync(swipeSql) && (connectionString || (accessToken && projectRef))) {
+    if (accessToken && projectRef) {
+      await runSqlFileManagementApi(projectRef, accessToken, swipeSql);
+    } else if (connectionString) {
+      const client = new Client({
+        connectionString,
+        ssl: { rejectUnauthorized: false },
+      });
+      await client.connect();
+      try {
+        await runSqlFilePg(client, swipeSql);
+      } finally {
+        await client.end();
+      }
+    }
+    console.log("Demo discovery swipes applied.");
   }
 }
 

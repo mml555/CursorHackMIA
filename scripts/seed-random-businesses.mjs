@@ -1,8 +1,12 @@
 /**
- * Seed 50 approved Austin businesses (6 curated + 44 generated) with offers/needs.
+ * Seed approved businesses with offers/needs + sample discovery swipes.
  *
  * Usage (local or remote):
  *   node scripts/seed-random-businesses.mjs
+ *   SEED_BUSINESS_COUNT=200 node scripts/seed-random-businesses.mjs
+ *
+ * Default: 150 businesses (6 curated + 144 generated), 300 listings,
+ * demo swipes from focal business + mutual interests.
  *
  * Requires NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in env
  * (.env.local is loaded automatically when present).
@@ -273,6 +277,15 @@ const OFFER_CATEGORIES = [
   "Office cleaning",
 ];
 
+const METROS = ["Austin", "Dallas", "Houston"];
+
+const DEMO_FOCAL_BUSINESS_ID = "10000000-0000-4000-8000-000000000001";
+
+const SEED_BUSINESS_COUNT = Math.min(
+  500,
+  Math.max(7, Number.parseInt(process.env.SEED_BUSINESS_COUNT ?? "150", 10) || 150),
+);
+
 const NEED_CATEGORIES = [
   "Brand photography",
   "Wellness sessions",
@@ -317,7 +330,7 @@ function generatedBusiness(index) {
     legal_name,
     dba,
     slug,
-    metro: "Austin",
+    metro: METROS[index % METROS.length],
     vertical,
     website: `https://${slug}.example.com`,
     description: `${dba} provides ${vertical.toLowerCase()} services for Austin-area small businesses.`,
@@ -343,10 +356,52 @@ function generatedBusiness(index) {
 
 function allBusinesses() {
   const generated = [];
-  for (let i = 7; i <= 50; i += 1) {
+  for (let i = 7; i <= SEED_BUSINESS_COUNT; i += 1) {
     generated.push(generatedBusiness(i));
   }
   return [...CURATED, ...generated];
+}
+
+/** Deterministic demo swipes: focal interest, mutual pairs, scattered passes. */
+function buildDiscoverySwipes(businesses) {
+  const ids = businesses.map((b) => b.id);
+  const byId = new Set(ids);
+  const swipes = new Map();
+
+  const add = (swiperId, targetId, action) => {
+    if (swiperId === targetId || !byId.has(swiperId) || !byId.has(targetId)) {
+      return;
+    }
+    swipes.set(`${swiperId}:${targetId}`, {
+      swiper_business_id: swiperId,
+      target_business_id: targetId,
+      action,
+    });
+  };
+
+  // Demo focal (Sunrise Yoga) interested in next 35 businesses
+  for (const target of ids.slice(1, 36)) {
+    add(DEMO_FOCAL_BUSINESS_ID, target, "interested");
+  }
+
+  // Mutual interest back toward focal from businesses 2–12
+  for (const swiper of ids.slice(1, 12)) {
+    add(swiper, DEMO_FOCAL_BUSINESS_ID, "interested");
+  }
+
+  // Cross-interest chains for matches tab (even ↔ even+1)
+  for (let i = 6; i < Math.min(ids.length - 1, 80); i += 2) {
+    add(ids[i], ids[i + 1], "interested");
+    add(ids[i + 1], ids[i], "interested");
+  }
+
+  // Pass / save variety from later businesses
+  for (let i = 40; i < Math.min(ids.length, 120); i += 3) {
+    const target = ids[(i * 7) % ids.length];
+    add(ids[i], target, i % 6 === 0 ? "save" : "pass");
+  }
+
+  return [...swipes.values()];
 }
 
 async function main() {
@@ -428,6 +483,23 @@ async function main() {
     process.exit(1);
   }
 
+  const swipeRows = buildDiscoverySwipes(businesses);
+  const chunkSize = 100;
+  for (let i = 0; i < swipeRows.length; i += chunkSize) {
+    const chunk = swipeRows.slice(i, i + chunkSize);
+    const { error: swipeError } = await supabase
+      .from("business_discovery_swipes")
+      .upsert(chunk, { onConflict: "swiper_business_id,target_business_id" });
+    if (swipeError) {
+      console.error("discovery swipes upsert failed:", swipeError.message);
+      process.exit(1);
+    }
+  }
+
+  const { count: matchCount } = await supabase
+    .from("business_matches")
+    .select("id", { count: "exact", head: true });
+
   const { count, error: countError } = await supabase
     .from("businesses")
     .select("id", { count: "exact", head: true })
@@ -439,7 +511,7 @@ async function main() {
   }
 
   console.log(
-    `Seeded ${businesses.length} businesses (${listings.length} listings). Approved total: ${count ?? "?"}`,
+    `Seeded ${businesses.length} businesses (${listings.length} listings, ${swipeRows.length} discovery swipes, ${matchCount ?? 0} mutual matches). Approved total: ${count ?? "?"}`,
   );
 }
 
