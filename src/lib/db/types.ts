@@ -180,6 +180,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      listing_embeddings: {
+        Row: {
+          listing_id: string;
+          embedding: string;
+          model: string;
+          content_hash: string;
+          updated_at: string;
+        };
+        Insert: {
+          listing_id: string;
+          embedding: string | number[];
+          model?: string;
+          content_hash: string;
+          updated_at?: string;
+        };
+        Update: {
+          listing_id?: string;
+          embedding?: string | number[];
+          model?: string;
+          content_hash?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       trade_proposals: {
         Row: {
           id: string;
@@ -192,6 +216,9 @@ export type Database = {
           cash_topup_display: number | null;
           metro: string | null;
           vertical: string | null;
+          source: string;
+          match_score: number | null;
+          match_reason: Json | null;
           created_by_clerk_id: string | null;
           published_at: string | null;
           created_at: string;
@@ -208,6 +235,9 @@ export type Database = {
           cash_topup_display?: number | null;
           metro?: string | null;
           vertical?: string | null;
+          source?: string;
+          match_score?: number | null;
+          match_reason?: Json | null;
           created_by_clerk_id?: string | null;
           published_at?: string | null;
           created_at?: string;
@@ -224,6 +254,9 @@ export type Database = {
           cash_topup_display?: number | null;
           metro?: string | null;
           vertical?: string | null;
+          source?: string;
+          match_score?: number | null;
+          match_reason?: Json | null;
           created_by_clerk_id?: string | null;
           published_at?: string | null;
           created_at?: string;
