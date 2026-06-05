@@ -154,6 +154,14 @@ async function handleDiscovery(req, res, pathname, method) {
     return success(res, payload);
   }
 
+  const businessProfileMatch = pathname.match(
+    /^\/discovery\/businesses\/([^/]+)$/,
+  );
+  if (businessProfileMatch && method === "GET") {
+    const payload = await discovery.getBusinessProfile(businessProfileMatch[1]);
+    return success(res, payload);
+  }
+
   failure(res, Object.assign(new Error("Not found"), { status: 404, code: "NOT_FOUND" }));
 }
 

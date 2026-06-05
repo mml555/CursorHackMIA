@@ -77,6 +77,9 @@ a { color: inherit; text-decoration: none; }
   background: linear-gradient(135deg, #2a2d35, #1e2026); }
 
 /* ---------- Business card ---------- */
+.card-clickable { cursor: pointer; }
+.card-view-link { display: block; margin-top: 14px; font-size: 13px; font-weight: 600; color: var(--amber); }
+.match-actions { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
 .biz-top { display: flex; align-items: center; gap: 12px; }
 .biz-name { font-size: 19px; font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .biz-line { font-size: 14px; margin-top: 9px; line-height: 1.5; }
@@ -173,6 +176,39 @@ a { color: inherit; text-decoration: none; }
 .logostrip-label { font-size: 12px; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 20px; }
 .logostrip-row { display: flex; align-items: center; gap: 34px; flex-wrap: wrap; }
 .logostrip-row .lname { display: flex; align-items: center; gap: 10px; color: var(--text-2); font-weight: 600; font-size: 15px; }
+
+/* ---------- Business profile ---------- */
+.profile-back { margin-bottom: 20px; }
+.profile-back-arrow { display: inline-flex; transform: rotate(180deg); }
+.profile-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+.profile-main { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.profile-hero { display: flex; flex-direction: column; gap: 18px; }
+.profile-hero-top { display: flex; align-items: flex-start; gap: 18px; }
+.profile-hero-copy { min-width: 0; flex: 1; }
+.profile-logo { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; flex: none; border: 1px solid var(--hairline); }
+.profile-name { font-size: 32px; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.profile-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+.profile-metro { font-size: 13px; color: var(--text-2); }
+.profile-legal { margin: 8px 0 0; font-size: 13px; }
+.profile-description { margin: 0; font-size: 15px; line-height: 1.65; color: var(--text-1); }
+.profile-website { display: inline-block; font-size: 14px; color: var(--amber); word-break: break-all; }
+.profile-sent { margin: 0; padding: 12px 14px; border-radius: var(--r-input); border: 1px solid rgba(34,197,94,.25); background: var(--success-bg); color: var(--text-2); font-size: 13px; }
+.profile-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.profile-section { background: var(--obsidian); border: 1px solid var(--hairline); border-radius: var(--r-card); padding: var(--card-pad); }
+.profile-section-title { margin: 0 0 14px; font-size: 18px; font-weight: 600; }
+.profile-empty { margin: 0; }
+.profile-listings { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.profile-listing { padding-bottom: 12px; border-bottom: 1px solid var(--hairline); }
+.profile-listing:last-child { padding-bottom: 0; border-bottom: none; }
+.profile-listing-main { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.profile-listing-cat { font-size: 15px; font-weight: 600; color: var(--text-1); }
+.profile-listing-qty { font-family: var(--font-mono); font-size: 12px; color: var(--text-2); }
+.profile-listing-notes { margin: 6px 0 0; font-size: 14px; line-height: 1.5; color: var(--text-2); }
+.profile-gallery { position: sticky; top: 84px; }
+.profile-photos { display: flex; flex-direction: column; gap: 12px; }
+.profile-photo { margin: 0; }
+.profile-photo img { width: 100%; border-radius: 12px; border: 1px solid var(--hairline); display: block; }
+.profile-photo figcaption { margin-top: 8px; font-size: 12px; color: var(--text-2); line-height: 1.45; }
 
 /* ---------- Network grid ---------- */
 .toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 24px 0 28px; }
@@ -271,6 +307,8 @@ a { color: inherit; text-decoration: none; }
 .brand-btn { cursor: pointer; background: none; border: none; padding: 0; }
 
 @media (max-width: 920px) {
+  .profile-layout { grid-template-columns: 1fr; }
+  .profile-gallery { position: static; }
   .grid, .value-row { grid-template-columns: 1fr 1fr; }
   .hero h1 { font-size: 44px; }
   .nav { gap: 14px; padding: 0 16px; }

@@ -3,12 +3,27 @@ import type {
   MatchParty,
   PartialMatch,
 } from "@/lib/matching/types";
+import { getBusinessMediaPublicUrl } from "@/lib/storage/business-media";
 import type {
+  BusinessProfile,
   DiscoveryCard,
   DiscoveryListing,
   DiscoveryMatch,
   DiscoveryMember,
+  DiscoveryPhoto,
 } from "@/lib/discovery/types";
+
+export function parsePhotos(value: unknown): DiscoveryPhoto[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter(
+      (item): item is DiscoveryPhoto =>
+        typeof item === "object" &&
+        item !== null &&
+        typeof (item as DiscoveryPhoto).storage_path === "string",
+    )
+    .sort((a, b) => a.sort_order - b.sort_order);
+}
 
 function parseListings(value: unknown): DiscoveryListing[] {
   if (!Array.isArray(value)) return [];
@@ -34,6 +49,34 @@ function formatListingLine(listings: DiscoveryListing[]): string {
     return `${first.category}, ${first.quantity} hours`;
   }
   return first.category;
+}
+
+export function cardToProfile(card: DiscoveryCard): BusinessProfile {
+  const member = cardToMember(card);
+
+  return {
+    id: card.business_id,
+    name: card.company_name,
+    legalName: card.legal_name,
+    dba: card.dba,
+    industry: card.industry,
+    metro: card.metro,
+    website: card.website,
+    description: card.description,
+    logoUrl: card.logo_storage_path
+      ? getBusinessMediaPublicUrl(card.logo_storage_path)
+      : null,
+    photos: parsePhotos(card.photos).map((photo) => ({
+      ...photo,
+      public_url: getBusinessMediaPublicUrl(photo.storage_path),
+    })),
+    offering: parseListings(card.offering),
+    lookingFor: parseListings(card.looking_for),
+    trading: member.trading,
+    looking: member.looking,
+    score: member.score,
+    trades: member.trades,
+  };
 }
 
 export function cardToMember(card: DiscoveryCard): DiscoveryMember {

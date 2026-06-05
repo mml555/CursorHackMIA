@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import {
   buildSimpleRecommendations,
   cardToMember,
+  cardToProfile,
   cardsToMembers,
   normalizeCard,
 } from "./discovery-mappers.mjs";
@@ -156,6 +157,25 @@ export function createDiscoveryService({ supabaseUrl, supabaseServiceRoleKey }) 
       const supabase = await getSupabase();
       const cards = await listDiscoveryCards(supabase, { metro, industry, query });
       return { members: cardsToMembers(cards) };
+    },
+
+    async getBusinessProfile(businessId) {
+      const supabase = await getSupabase();
+      const { data, error } = await supabase
+        .from("business_discovery_cards")
+        .select("*")
+        .eq("business_id", businessId)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) {
+        const notFound = new Error("Business not found");
+        notFound.status = 404;
+        notFound.code = "NOT_FOUND";
+        throw notFound;
+      }
+
+      return cardToProfile(normalizeCard(data), supabaseUrl);
     },
 
     async getStats(metro) {

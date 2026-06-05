@@ -159,6 +159,9 @@ export function Matches({ go }: { go: Navigate }) {
                   match={mt}
                   index={i}
                   onPropose={(m) => setModal(m)}
+                  onViewProfile={(m) =>
+                    go("profile", { businessId: m.id, returnTo: "matches" })
+                  }
                 />
               ))}
             </div>

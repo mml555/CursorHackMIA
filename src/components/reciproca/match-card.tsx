@@ -12,10 +12,12 @@ export function MatchCard({
   match,
   index,
   onPropose,
+  onViewProfile,
 }: {
   match: Match;
   index: number;
   onPropose: (member: Member) => void;
+  onViewProfile?: (member: Member) => void;
 }) {
   const m = match.member;
 
@@ -54,7 +56,12 @@ export function MatchCard({
           startDelay={match.top ? 600 : 0}
         />
 
-        <div style={{ marginTop: 16 }}>
+        <div className="match-actions">
+          {onViewProfile && (
+            <Button variant="ghost" block onClick={() => onViewProfile(m)}>
+              View profile
+            </Button>
+          )}
           <Button
             variant={match.top ? "primary" : "secondary"}
             block

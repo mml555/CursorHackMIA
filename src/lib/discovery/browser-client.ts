@@ -1,4 +1,5 @@
 import type {
+  BusinessProfile,
   DiscoveryMember,
   DiscoveryRecommendations,
   DiscoveryStats,
@@ -37,6 +38,16 @@ export async function fetchDiscoveryStats(
   const params = new URLSearchParams({ metro });
   const res = await fetch(`/api/discovery/stats?${params.toString()}`);
   return parseResponse<DiscoveryStats>(res);
+}
+
+export async function fetchBusinessProfile(
+  businessId: string,
+): Promise<BusinessProfile> {
+  const res = await fetch(
+    `/api/discovery/businesses/${encodeURIComponent(businessId)}`,
+  );
+  const payload = await parseResponse<{ profile: BusinessProfile }>(res);
+  return payload.profile;
 }
 
 export async function fetchDiscoveryNetwork(options?: {

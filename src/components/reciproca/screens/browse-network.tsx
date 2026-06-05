@@ -133,7 +133,13 @@ export function BrowseNetwork({
         {!loading && !error && (
           <div className="grid">
             {shown.map((m) => (
-              <BusinessCard key={m.id} member={m} />
+              <BusinessCard
+                key={m.id}
+                member={m}
+                onView={(member) =>
+                  go("profile", { businessId: member.id, returnTo: "network" })
+                }
+              />
             ))}
           </div>
         )}

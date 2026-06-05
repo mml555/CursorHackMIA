@@ -7,6 +7,15 @@ export type DiscoveryListing = {
   notes: string | null;
 };
 
+export type DiscoveryPhoto = {
+  id: string;
+  storage_path: string;
+  file_name: string;
+  mime_type: string | null;
+  caption: string | null;
+  sort_order: number;
+};
+
 export type DiscoveryCard = {
   business_id: string;
   company_name: string;
@@ -16,11 +25,36 @@ export type DiscoveryCard = {
   metro: string | null;
   website: string | null;
   description: string | null;
+  logo_storage_path: string | null;
+  photos: DiscoveryPhoto[];
   reputation_score: number | null;
   ratings_count: number;
   looking_for: DiscoveryListing[];
   offering: DiscoveryListing[];
   primary_looking_for: string | null;
+};
+
+export type BusinessProfilePhoto = DiscoveryPhoto & {
+  public_url: string;
+};
+
+export type BusinessProfile = {
+  id: string;
+  name: string;
+  legalName: string;
+  dba: string | null;
+  industry: string;
+  metro: string | null;
+  website: string | null;
+  description: string | null;
+  logoUrl: string | null;
+  photos: BusinessProfilePhoto[];
+  offering: DiscoveryListing[];
+  lookingFor: DiscoveryListing[];
+  trading: string;
+  looking: string;
+  score: number;
+  trades: number;
 };
 
 export type DiscoveryStats = {

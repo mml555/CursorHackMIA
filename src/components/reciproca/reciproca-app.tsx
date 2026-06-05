@@ -2,20 +2,31 @@
 
 import { useState } from "react";
 import { BrowseNetwork } from "./screens/browse-network";
+import { BusinessProfileScreen } from "./screens/business-profile";
 import { Join } from "./screens/join";
 import { Landing } from "./screens/landing";
 import { LandingNav } from "./screens/landing-nav";
 import { Matches } from "./screens/matches";
 import { TopNav } from "./screens/top-nav";
-import type { Screen } from "./types";
+import type { Navigate, Screen } from "./types";
 import { useDiscoveryStats } from "./use-discovery-stats";
 
 export function ReciprocaApp() {
   const [screen, setScreen] = useState<Screen>("landing");
+  const [profileBusinessId, setProfileBusinessId] = useState<string | null>(
+    null,
+  );
+  const [profileReturnTo, setProfileReturnTo] = useState<Screen>("network");
   const { summary } = useDiscoveryStats("Austin");
 
-  const go = (next: Screen) => {
+  const go: Navigate = (next, options) => {
     setScreen(next);
+    if (options?.businessId) {
+      setProfileBusinessId(options.businessId);
+      setProfileReturnTo(options.returnTo ?? screen);
+    } else if (next !== "profile") {
+      setProfileBusinessId(null);
+    }
     window.scrollTo({ top: 0 });
   };
 
@@ -33,6 +44,13 @@ export function ReciprocaApp() {
       {screen === "matches" && <Matches go={go} />}
       {screen === "network" && <BrowseNetwork go={go} summary={summary} />}
       {screen === "join" && <Join go={go} />}
+      {screen === "profile" && profileBusinessId && (
+        <BusinessProfileScreen
+          businessId={profileBusinessId}
+          returnTo={profileReturnTo}
+          go={go}
+        />
+      )}
     </div>
   );
 }

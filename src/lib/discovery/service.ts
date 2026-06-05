@@ -5,7 +5,9 @@ import { loadMatchGraph } from "@/lib/matching/db/load-graph";
 import {
   buildRecommendations,
   cardToMember,
+  cardToProfile,
   cardsToMembers,
+  parsePhotos,
 } from "@/lib/discovery/mappers";
 import { DEMO_FOCAL_BUSINESS_SLUG } from "@/lib/discovery/constants";
 import type {
@@ -24,6 +26,9 @@ function normalizeCard(row: Record<string, unknown>): DiscoveryCard {
     metro: row.metro != null ? String(row.metro) : null,
     website: row.website != null ? String(row.website) : null,
     description: row.description != null ? String(row.description) : null,
+    logo_storage_path:
+      row.logo_storage_path != null ? String(row.logo_storage_path) : null,
+    photos: parsePhotos(row.photos),
     reputation_score:
       row.reputation_score != null ? Number(row.reputation_score) : null,
     ratings_count: Number(row.ratings_count ?? 0),
@@ -77,6 +82,24 @@ export async function listDiscoveryCards(options?: {
   }
 
   return cards;
+}
+
+export async function getBusinessProfile(
+  businessId: string,
+): Promise<import("@/lib/discovery/types").BusinessProfile | null> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("business_discovery_cards")
+    .select("*")
+    .eq("business_id", businessId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+
+  return cardToProfile(
+    normalizeCard(data as Record<string, unknown>),
+  );
 }
 
 export async function getDiscoveryStats(metro?: string): Promise<DiscoveryStats> {

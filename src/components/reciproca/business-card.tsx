@@ -1,9 +1,32 @@
 import type { Member } from "./types";
 import { Chip, Stars, Vetted } from "./primitives";
 
-export function BusinessCard({ member }: { member: Member }) {
+export function BusinessCard({
+  member,
+  onView,
+}: {
+  member: Member;
+  onView?: (member: Member) => void;
+}) {
+  const interactive = Boolean(onView);
+
   return (
-    <div className="card card-hover">
+    <div
+      className={"card card-hover" + (interactive ? " card-clickable" : "")}
+      role={interactive ? "button" : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      onClick={interactive ? () => onView?.(member) : undefined}
+      onKeyDown={
+        interactive
+          ? (event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onView?.(member);
+              }
+            }
+          : undefined
+      }
+    >
       <div className="biz-top">
         <Chip name={member.name} />
         <div>
@@ -29,6 +52,9 @@ export function BusinessCard({ member }: { member: Member }) {
         </span>
         <Stars value={member.score} />
       </div>
+      {interactive && (
+        <span className="card-view-link">View profile →</span>
+      )}
     </div>
   );
 }

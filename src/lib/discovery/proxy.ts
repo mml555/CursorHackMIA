@@ -5,6 +5,7 @@ import {
 } from "@/lib/backend/client";
 import { requireUserId } from "@/lib/clerk/auth";
 import type {
+  BusinessProfile,
   DiscoveryRecommendations,
   DiscoveryStats,
 } from "@/lib/discovery/types";
@@ -17,6 +18,12 @@ type DiscoverySwipeResponse = {
   swipe: unknown;
   demo?: boolean;
 };
+
+export function fetchDiscoveryBusinessProfile(businessId: string) {
+  return backendRequestPublic<{ profile: BusinessProfile }>(
+    `/discovery/businesses/${encodeURIComponent(businessId)}`,
+  ).then((payload) => payload.profile);
+}
 
 export function fetchDiscoveryNetwork(searchParams: URLSearchParams) {
   const query = searchParams.toString();
